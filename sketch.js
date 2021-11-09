@@ -9,36 +9,14 @@ var rayPoints = [];
 var isPolygonClosed = false;
 var redLines = [];
 
-class Point {
-  constructor(x, y) {
-    this.x = x;
-    this.y = y;
-  }
-}
 
-function isLeftTurn(a, b, c) {
-  /*
-    return true if if the point c turn to the left compared to the 2 others
-    @param {Point} a, b, c
-  */
-  return a.x * (b.y - c.y) - a.y * (b.x - c.x) + b.x * c.y - b.y * c.x < 0;
-}
-
-function isLineCrossingSegment(a, b, c, d) {
-  /* return true if the line a-b crosses the segemnt [cd] */
-  return isLeftTurn(a, b, c) !== isLeftTurn(a, b, d);
-}
-
-function isRayCrossingSegment(a, b, c, d) {}
-
-function isIntersection(a, b, c, d) {
-  return isLineCrossingSegment(a, b, c, d) && isLineCrossingSegment(c, d, a, b);
-}
-
+/**
+ * return true if the line a-b intersect the polygon
+ * @param a
+ * @param b
+ * @returns {boolean}
+ */
 function isIntersectionInPolygon(a, b) {
-  /**
-   * return true if the line a-b intersect the polygon
-   */
   for (const i in points) {
     if (i > 1 && i < points.length - 1) {
       if (isIntersection(a, b, points[i - 1], points[i])) {
@@ -140,28 +118,12 @@ function resetPoints() {
   rayPoints = [];
 }
 
-function drawPoint(point) {
-  ellipse(point.x, point.y, 5, 5);
-}
-
-function drawLine(a, b) {
-  /* draw a line between two points */
-  line(a.x, a.y, b.x, b.y);
-}
-
-function drawRay(a, b) {
-  /* draw a ray passing by two points */
-  // using p5.js library for vectors operations
-  var vect_a = new p5.Vector(a.x, a.y);
-  var vect_b = new p5.Vector(b.x, b.y);
-  let direction = p5.Vector.sub(vect_a, vect_b).setMag(500);
-  vect_a = p5.Vector.add(vect_a, direction);
-  vect_b = p5.Vector.sub(vect_b, direction);
-  line(vect_a.x, vect_a.y, vect_b.x, vect_b.y);
-}
-
+/**
+ *
+ * @param p
+ * @returns {boolean} true if a point p is in the canva
+ */
 function isInCanva(p) {
-  /* return true if a point p is in the canva */
   return (
     CANVA_X_LEFT < p.x &&
     p.x < CANVA_X_RIGHT &&
