@@ -16,9 +16,9 @@ var redLines = [];
  * @param b
  * @returns {boolean}
  */
-function isIntersectionInPolygon(a, b) {
+function isIntersectionInPolygon(a, b, start = 0) {
   for (const i in points) {
-    if (i > 1 && i < points.length - 1) {
+    if (i > start && i < points.length - 1) {
       if (isIntersection(a, b, points[i - 1], points[i])) {
         redLines.push([points[i - 1], points[i]]);
         return true;
@@ -30,10 +30,10 @@ function isIntersectionInPolygon(a, b) {
 
 function closePolygon() {
   redLines = [];
-  if (!isIntersectionInPolygon(points.at(-1), points.at(0))) {
+  if (!isIntersectionInPolygon(points[points.length-1], points[0], 1)) {
     isPolygonClosed = true;
   } else {
-    redLines.push([points.at(-1), points.at(0)]);
+    redLines.push([points[points.length-1], points[0]]);
   }
 }
 
@@ -65,7 +65,7 @@ function draw() {
     }
   }
   if (isPolygonClosed) {
-    drawLine(points.at(-1), points.at(0));
+    drawLine(points[points.length-1], points[0]);
   }
   if (redLines.length > 0) {
     stroke("red");
@@ -95,9 +95,9 @@ function mousePressed() {
     } else {
       if (
         points.length > 0 &&
-        isIntersectionInPolygon(points.at(-1), newPoint)
+        isIntersectionInPolygon(points[points.length-1], newPoint)
       ) {
-        redLines.push([points.at(-1), newPoint]);
+        redLines.push([points[points.length-1], newPoint]);
       } else {
         points.push(newPoint);
       }
