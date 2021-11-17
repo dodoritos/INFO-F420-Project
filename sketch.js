@@ -11,7 +11,7 @@ var redLines = [];
 
 
 /**
- * return true if the line a-b intersect the polygon
+ * return true if the segment [ab] intersect the polygon
  * @param a
  * @param b
  * @returns {boolean}
@@ -25,7 +25,7 @@ function isIntersectionInPolygon(a, b, start = 0) {
       return true;
     }
   }
-  
+
   for (const i in points) {
     if (i > start && i < points.length - 1) {
       if (isIntersection(a, b, points[i - 1], points[i])) {
@@ -44,6 +44,27 @@ function closePolygon() {
   } else {
     redLines.push([points[points.length-1], points[0]]);
   }
+}
+
+/**
+ * return true if the point p is in the polygon
+ * @param p
+ * @returns {boolean}
+ */
+function isPointInPolygone(p){
+  oddIntersection = false;
+  o = new Point(0, 0);
+  for (const i in points) {
+    if (i > 0 && i < points.length) {
+      if (isIntersection(o, p, points[i - 1], points[i])) {
+        oddIntersection = !oddIntersection;
+      }
+    }
+  }
+  if (isIntersection(o, p,points[points.length-1], points[0])) {
+    oddIntersection = !oddIntersection;
+  }
+  return oddIntersection;
 }
 
 function setup() {
@@ -99,9 +120,10 @@ function mousePressed() {
   var newPoint = new Point(mouseX, mouseY);
   if (isInCanva(newPoint)) {
     redLines = [];
-    window.print(newPoint);
     if (isPolygonClosed) {
-      rayPoints.push(newPoint);
+      if (isPointInPolygone(newPoint)){
+        rayPoints.push(newPoint);
+      }
     } else {
       if (
         points.length > 0 &&
