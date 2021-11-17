@@ -17,6 +17,15 @@ var redLines = [];
  * @returns {boolean}
  */
 function isIntersectionInPolygon(a, b, start = 0) {
+  //window.print(points.length);
+  if (points.length >= 2){
+    c = points[points.length - 2];
+    if (isPointOfSegment(c, a, b) || isPointOfSegment(a, b, c)){
+      redLines.push([c, a]);
+      return true;
+    }
+  }
+  
   for (const i in points) {
     if (i > start && i < points.length - 1) {
       if (isIntersection(a, b, points[i - 1], points[i])) {
@@ -90,6 +99,7 @@ function mousePressed() {
   var newPoint = new Point(mouseX, mouseY);
   if (isInCanva(newPoint)) {
     redLines = [];
+    window.print(newPoint);
     if (isPolygonClosed) {
       rayPoints.push(newPoint);
     } else {

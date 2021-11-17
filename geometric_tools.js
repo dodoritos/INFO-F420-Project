@@ -5,6 +5,14 @@ class Point {
         this.y = y;
     }
 }
+/**
+ * @param {Point} a
+ * @param {Point} b
+ * @return {float} distance between a and b
+ */
+function distance(a, b){
+    return sqrt((a.x-b.x)**2 + (a.y-b.y)**2);
+}
 
 /**
  * @param {Point} a
@@ -14,6 +22,16 @@ class Point {
  */
 function isLeftTurn(a, b, c) {
     return a.x * (b.y - c.y) - a.y * (b.x - c.x) + b.x * c.y - b.y * c.x < 0;
+}
+
+/**
+ * @param {Point} a
+ * @param {Point} b
+ * @param {Point} c
+ * @return {boolean} true if if the point c is on segement [ab]
+ */
+function isPointOfSegment(a, b, c) {
+    return distance(a, c) + distance(c, b) == distance(a, b);
 }
 
 
