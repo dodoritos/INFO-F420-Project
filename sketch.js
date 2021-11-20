@@ -5,7 +5,7 @@ const CANVA_Y_UP = 100;
 const CANVA_Y_DOWN = 500;
 
 var points = [];
-var rayPoints = [];
+var pointsInside = [];
 var isPolygonClosed = false;
 var redLines = [];
 
@@ -39,10 +39,12 @@ function isIntersectionInPolygon(a, b, start = 0) {
 
 function closePolygon() {
   redLines = [];
-  if (!isIntersectionInPolygon(points[points.length-1], points[0], 1)) {
-    isPolygonClosed = true;
-  } else {
-    redLines.push([points[points.length-1], points[0]]);
+  if (points.length >= 2) {
+    if (!isIntersectionInPolygon(points[points.length-1], points[0], 1)) {
+      isPolygonClosed = true;
+    } else {
+      redLines.push([points[points.length-1], points[0]]);
+    }
   }
 }
 
@@ -52,7 +54,7 @@ function closePolygon() {
  * @returns {boolean}
  */
 function isPointInPolygone(p){
-  oddIntersection = false;
+  var oddIntersection = false;
   o = new Point(0, 0);
   for (const i in points) {
     if (i > 0 && i < points.length) {
@@ -68,24 +70,25 @@ function isPointInPolygone(p){
 }
 
 function setup() {
-  createCanvas(windowWidth, windowHeight);
-  // Put setup code here
+  var buttonClear = createButton("Clear");
+  buttonClear.parent("canvas");
+  buttonClear.mousePressed(resetPoints);
+
+  var buttonClose = createButton("Close polygon");
+  buttonClose.parent("canvas");
+  buttonClose.mousePressed(closePolygon);
+
+  createP('').parent("canvas"); // new line
+  let canvas = createCanvas(400, 400);
+  canvas.parent("canvas");
+  canvas.mousePressed(addPoint);
 }
+
 
 function draw() {
   background(200);
   stroke("black");
   fill("white");
-
-  buttonClear = createButton("Clear");
-  buttonClear.position(30, 30);
-  buttonClear.mousePressed(resetPoints);
-  buttonClose = createButton("Close polygon");
-  buttonClose.position(30, 60);
-  buttonClose.mousePressed(closePolygon);
-
-  rectMode(CORNERS);
-  rect(CANVA_X_LEFT, CANVA_Y_UP, CANVA_X_RIGHT, CANVA_Y_DOWN);
 
   fill("black");
   for (i in points) {
@@ -104,62 +107,42 @@ function draw() {
     }
   }
 
-  if (rayPoints.length > 0) {
+  if (pointsInside.length > 0) {
     stroke("green");
-    drawPoint(rayPoints[0]);
-    if (rayPoints.length > 1) {
-      drawPoint(rayPoints[1]);
-      drawRay(rayPoints[0], rayPoints[1]);
+    drawPoint(pointsInside[0]);
+    if (pointsInside.length > 1) {
+      drawPoint(pointsInside[1]);
+      drawLine(pointsInside[0], pointsInside[1]);
     }
   }
 }
 
-function mousePressed() {
-  console.log(rayPoints.length);
+function addPoint() {
+  console.log(pointsInside.length);
 
   var newPoint = new Point(mouseX, mouseY);
-  if (isInCanva(newPoint)) {
-    redLines = [];
-    if (isPolygonClosed) {
-      if (isPointInPolygone(newPoint)){
-        rayPoints.push(newPoint);
-      }
+  redLines = [];
+  if (isPolygonClosed) {
+    if (isPointInPolygone(newPoint)){
+      pointsInside.push(newPoint);
+    }
+  } else {
+    if (
+      points.length > 0 &&
+      isIntersectionInPolygon(points[points.length-1], newPoint)
+    ) {
+      redLines.push([points[points.length-1], newPoint]);
     } else {
-      if (
-        points.length > 0 &&
-        isIntersectionInPolygon(points[points.length-1], newPoint)
-      ) {
-        redLines.push([points[points.length-1], newPoint]);
-      } else {
-        points.push(newPoint);
-      }
+      points.push(newPoint);
     }
   }
 }
 
-// This Redraws the Canvas when resized
-windowResized = function () {
-  resizeCanvas(windowWidth, windowHeight);
-};
 
 function resetPoints() {
   points = [];
   convexHullPoints = [];
   isPolygonClosed = false;
   redLines = [];
-  rayPoints = [];
-}
-
-/**
- *
- * @param p
- * @returns {boolean} true if a point p is in the canva
- */
-function isInCanva(p) {
-  return (
-    CANVA_X_LEFT < p.x &&
-    p.x < CANVA_X_RIGHT &&
-    CANVA_Y_UP < p.y &&
-    p.y < CANVA_Y_DOWN
-  );
+  pointsInside = [];
 }
