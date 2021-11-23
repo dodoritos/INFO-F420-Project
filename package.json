@@ -2,13 +2,13 @@
   "name": "info-f420-project",
   "version": "1.0.0",
   "description": "",
-  "main": "sketch.js",
+  "main": "shortest_self_aproaching_path.js",
   "scripts": {
     "start": "serve",
     "build": "echo This is a static template, there is no bundler or bundling involved!"
   },
   "keywords": [],
-  "author": "Danny Ruchtie",
+  "author": "Dorian Hoet, Romain Mardulyn",
   "license": "MIT",
   "devDependencies": {
     "serve": "^11.2.0"
