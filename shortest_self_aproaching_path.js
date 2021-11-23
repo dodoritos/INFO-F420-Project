@@ -118,7 +118,6 @@ function draw() {
 }
 
 function addPoint() {
-  console.log(pointsInside.length);
 
   var newPoint = new Point(mouseX, mouseY);
   redLines = [];
