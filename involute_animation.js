@@ -4,7 +4,7 @@ const COUNTER_CLOCK_WISE = true;
 var slider = document.getElementById("stepSlider");
 
 
-var s = function( p ) { // p could be any variable name
+var s = function( p ) {
 
     function draw_involute_of_circle(center, starting_point, direction, step_to_output) {
         var output_vectors = [];
@@ -37,7 +37,7 @@ var s = function( p ) { // p could be any variable name
         p.beginShape();
         for (let i = 0; i < 100; i++) {
             // console.log(relative_point.toString());
-            let tg_copy = tengent_point.copy().setMag(TWO_PI*radius*(angle/TWO_PI));
+            let tg_copy = tengent_point.copy().setMag(radius*angle);
             var drawing_point = relative_point.copy();
             drawing_point.add(center)
             drawing_point.add(tg_copy)
@@ -85,4 +85,6 @@ var s = function( p ) { // p could be any variable name
         //noFill();
     };
 };
-var p5 = new p5(s, 'involute');
+var myp5 = new p5(s, 'involute');
+
+
