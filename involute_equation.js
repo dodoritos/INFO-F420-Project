@@ -14,8 +14,6 @@ class CircleEq {
     }
 
     draw(canvas) {
-        canvas.noFill();
-        canvas.stroke('red');
         canvas.beginShape();
         for (let o = 0; o <= TWO_PI; o += TWO_PI/40) {
             let point_on_canvas = this.get_point(o).add(this.center);
@@ -46,25 +44,34 @@ class InvoluteOfCircle {
         let sin = Math.sin(angle);
         let cos = Math.cos(angle);
         return createVector(r*(cos+angle*sin),r*(sin-angle*cos));
-        /* let point_on_circle = this.circle.get_point(angle);
-        let p = point_on_circle.copy().rotate(HALF_PI);
-        p.setMag(this.circle.range*angle);
-        p.add(point_on_circle).add(this.circle.center);
-        return p;
-         */
     }
-    draw(canvas, start_rad, end_rad) {
+
+    get_tangent_vector(angle) {
+        return p5.Vector.fromAngle(angle + HALF_PI);
+    }
+
+    draw(canvas, start_rad, end_rad, display_lines) {
+        if (end_rad < start_rad)
+            [end_rad, start_rad] = [start_rad, end_rad];
         canvas.noFill();
         canvas.stroke('red');
         canvas.beginShape();
-        console.log('begin:  ' + start_rad);
-        console.log('end:    ' + end_rad);
         for (let o = start_rad; o <= end_rad; o += PI/40) {
             let point = this.get_point(o).add(this.circle.center);
-            // console.log(o);
             canvas.vertex(point.x, point.y);
         }
+        let point = this.get_point(end_rad).add(this.circle.center);
+        canvas.vertex(point.x, point.y);
         canvas.endShape();
+        if (display_lines) {
+            canvas.stroke('black');
+            let c1 = this.circle.get_point(start_rad).add(this.circle.center);
+            let p1 = this.get_point(start_rad).add(this.circle.center);
+            canvas.line(c1.x, c1.y, p1.x, p1.y);
+            let c2 = this.circle.get_point(end_rad).add(this.circle.center);
+            let p2 = this.get_point(end_rad).add(this.circle.center);
+            canvas.line(c2.x, c2.y, p2.x, p2.y);
+        }
     }
 }
 
@@ -95,8 +102,10 @@ var t = function( p ) {
 
     function redraw() {
         p.background(200);
+        p.stroke('black');
+        p.noFill();
         c.draw(p);
-        involute.draw(p, start*PI, end*PI);
+        involute.draw(p, start*PI, end*PI, true);
     }
 
     p.draw = function() {
