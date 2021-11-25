@@ -58,5 +58,7 @@ function drawAngle(canvas, base, vec, angle, myColor) {
     let vec_right = vec.copy().rotate(-angle/2);
     canvas.line(0, 0, vec_left.x, vec_left.y);
     canvas.line(0, 0, vec_right.x, vec_right.y);
+    canvas.arc(0,0,vec.mag()/5,vec.mag()/5,vec.heading()-(angle/2), vec.heading()+(angle/2));
+    // canvas.arc(0,0,100, 100,10, 20);
     canvas.pop();
 }
