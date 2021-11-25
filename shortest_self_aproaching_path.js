@@ -8,6 +8,7 @@ var points = [];
 var pointsInside = [];
 var isPolygonClosed = false;
 var redLines = [];
+var blueLines = [];
 var isConvex = [];
 
 
@@ -18,7 +19,6 @@ var isConvex = [];
  * @returns {boolean}
  */
 function isIntersectionInPolygon(a, b, start = 0) {
-  //window.print(points.length);
   if (points.length >= 2){
     c = points[points.length - 2];
     if (isPointOfSegment(c, a, b) || isPointOfSegment(a, b, c)){
@@ -47,6 +47,9 @@ function closePolygon() {
       redLines.push([points[points.length-1], points[0]]);
     }
   }
+  computeConvexList();
+  let ear = findEar();
+  blueLines.push([ear[0], ear[2]]);
 }
 
 /**
@@ -55,7 +58,7 @@ function closePolygon() {
  * @returns {boolean}
  */
 function isPointInPolygone(p, poly){
-  var oddIntersection = false;
+  let oddIntersection = false;
   o = new Point(0, 0);
   for (const i in poly) {
     if (i > 0 && i < poly.length) {
@@ -72,78 +75,103 @@ function isPointInPolygone(p, poly){
 
 /**
  * return the right-most point of the polygon.
- * @returns {Point}
+ * @returns {int}
  */
 function maxXPoint(){
-  var res = 0;
-  var maxi = Points[0].x;
-  for (const i in points){
+  let res = 0;
+  let maxi = points[0].x;
+  for (i in points){
     if (points[i].x > maxi){
       maxi = points[i].x;
       res = i;
     }
   }
-  return res;
+  return parseInt(res);
 }
 
-function getAnglePoints(i){
-  var p = []
+function getAnglePointsIndex(i){
+  let p = []
   if (i == 0){
-    p.push(points[points.length-1]);
+    p.push(points.length-1);
   }
   else{
-    p.push(points[i-1]);
+    p.push(i-1);
   }
 
-  p.push(points[i]);
+  p.push(i);
 
-  if (i == points.length-1){
-    p.push(points[0]);
+  if (i >= points.length-1){
+    p.push(0);
   }
   else{
-    p.push(points[i+1]);
+    p.push(i+1);
   }
+  //console.log(p);
   return p;
 }
 
-function computeConvexList(){
-  var before = [];
-  var after = [];
-  const start = maxXPoint();
-  var i = start;
+function getAnglePoints(i){
+  let indexs = getAnglePointsIndex(i);
+  return [points[indexs[0]], points[indexs[1]], points[indexs[2]]];
+}
 
-  var abc = getAnglePoints(start);
+function computeConvexList(){
+  let before = [];
+  let after = [];
+  let start = maxXPoint();
+  let i = start;
+
+  let abc = getAnglePoints(start);
   let a = abc[0];
   let b = abc[1];
   let c = abc[2];
-
-  var isLeftTurnCovex = isLeftTurn(a,b,c);
+  let isLeftTurnCovex = isLeftTurn(a,b,c);
 
   while (i < points.length){
     abc = getAnglePoints(i);
-    after.push(isLeftTurn(a,b,c) !== isLeftTurnCovex);
+    a = abc[0];
+    b = abc[1];
+    c = abc[2];
+    after.push(isLeftTurn(a,b,c) == isLeftTurnCovex);
     i = i+1;
   }
   i = 0;
   while (i < start){
     abc = getAnglePoints(i);
-    before.push(isLeftTurn(a,b,c) !== isLeftTurnCovex);
+    a = abc[0];
+    b = abc[1];
+    c = abc[2];
+    before.push(isLeftTurn(a,b,c) == isLeftTurnCovex);
     i = i+1;
   }
   isConvex = before.concat(after);
 }
 
 /**
- * returnone ear of the polygon
+ * return one ear of the polygon
  * @returns {Array}
  */
 function findEar(){
-  var i = 0;
-  var found = false;
-  while (!found){
+  let i = 0;
+  while (true){
+    if (isConvex[i]){
+      let triangle = getAnglePoints(i);
+      let triangleIndexs = getAnglePointsIndex(i);
+      let triangleEmpty = true;
+      let j = 0
 
+      while (triangleEmpty && j < points.length){
+        if (j !== parseInt(triangleIndexs[0]) && j !== parseInt(triangleIndexs[1]) && j !== parseInt(triangleIndexs[2])){
+          triangleEmpty = ! isPointInPolygone(points[j], triangle);
+        }
+        j = j+1;
+      }
 
-
+      if (triangleEmpty){
+        return triangle;
+      }
+    }
+    i = i+1;
   }
 }
 
@@ -185,6 +213,13 @@ function draw() {
     }
   }
 
+  if (blueLines.length > 0) {
+    stroke("blue");
+    for (const p in blueLines) {
+      drawLine(blueLines[p][0], blueLines[p][1]);
+    }
+  }
+
   if (pointsInside.length > 0) {
     stroke("green");
     drawPoint(pointsInside[0]);
@@ -223,4 +258,5 @@ function resetPoints() {
   redLines = [];
   pointsInside = [];
   isConvex = [];
+  blueLines = [];
 }
