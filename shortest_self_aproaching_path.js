@@ -8,6 +8,7 @@ var points = [];
 var pointsInside = [];
 var isPolygonClosed = false;
 var redLines = [];
+var isConvex = [];
 
 
 /**
@@ -53,20 +54,97 @@ function closePolygon() {
  * @param p
  * @returns {boolean}
  */
-function isPointInPolygone(p){
+function isPointInPolygone(p, poly){
   var oddIntersection = false;
   o = new Point(0, 0);
-  for (const i in points) {
-    if (i > 0 && i < points.length) {
-      if (isIntersection(o, p, points[i - 1], points[i])) {
+  for (const i in poly) {
+    if (i > 0 && i < poly.length) {
+      if (isIntersection(o, p, poly[i - 1], poly[i])) {
         oddIntersection = !oddIntersection;
       }
     }
   }
-  if (isIntersection(o, p,points[points.length-1], points[0])) {
+  if (isIntersection(o, p,poly[poly.length-1], poly[0])) {
     oddIntersection = !oddIntersection;
   }
   return oddIntersection;
+}
+
+/**
+ * return the right-most point of the polygon.
+ * @returns {Point}
+ */
+function maxXPoint(){
+  var res = 0;
+  var maxi = Points[0].x;
+  for (const i in points){
+    if (points[i].x > maxi){
+      maxi = points[i].x;
+      res = i;
+    }
+  }
+  return res;
+}
+
+function getAnglePoints(i){
+  var p = []
+  if (i == 0){
+    p.push(points[points.length-1]);
+  }
+  else{
+    p.push(points[i-1]);
+  }
+
+  p.push(points[i]);
+
+  if (i == points.length-1){
+    p.push(points[0]);
+  }
+  else{
+    p.push(points[i+1]);
+  }
+  return p;
+}
+
+function computeConvexList(){
+  var before = [];
+  var after = [];
+  const start = maxXPoint();
+  var i = start;
+
+  var abc = getAnglePoints(start);
+  let a = abc[0];
+  let b = abc[1];
+  let c = abc[2];
+
+  var isLeftTurnCovex = isLeftTurn(a,b,c);
+
+  while (i < points.length){
+    abc = getAnglePoints(i);
+    after.push(isLeftTurn(a,b,c) !== isLeftTurnCovex);
+    i = i+1;
+  }
+  i = 0;
+  while (i < start){
+    abc = getAnglePoints(i);
+    before.push(isLeftTurn(a,b,c) !== isLeftTurnCovex);
+    i = i+1;
+  }
+  isConvex = before.concat(after);
+}
+
+/**
+ * returnone ear of the polygon
+ * @returns {Array}
+ */
+function findEar(){
+  var i = 0;
+  var found = false;
+  while (!found){
+
+
+
+  }
 }
 
 function setup() {
@@ -122,7 +200,7 @@ function addPoint() {
   var newPoint = new Point(mouseX, mouseY);
   redLines = [];
   if (isPolygonClosed) {
-    if (isPointInPolygone(newPoint)){
+    if (isPointInPolygone(newPoint, points)){
       pointsInside.push(newPoint);
     }
   } else {
@@ -144,4 +222,5 @@ function resetPoints() {
   isPolygonClosed = false;
   redLines = [];
   pointsInside = [];
+  isConvex = [];
 }
