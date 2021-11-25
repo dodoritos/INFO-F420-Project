@@ -29,3 +29,34 @@ function drawRay(a, b) {
     vect_b = p5.Vector.sub(vect_b, direction);
     line(vect_a.x, vect_a.y, vect_b.x, vect_b.y);
 }
+
+/**
+ * draw an arrow for a vector at a given base position
+ * source: https://p5js.org/reference/#/p5.Vector/rotate
+ */
+function drawArrow(canvas, base, vec, myColor) {
+    canvas.push();
+    canvas.stroke(myColor);
+    canvas.strokeWeight(3);
+    canvas.fill(myColor);
+    canvas.translate(base.x, base.y);
+    canvas.line(0, 0, vec.x, vec.y);
+    canvas.rotate(vec.heading());
+    let arrowSize = 7;
+    canvas.translate(vec.mag() - arrowSize, 0);
+    canvas.triangle(0, arrowSize / 2, 0, -arrowSize / 2, arrowSize, 0);
+    canvas.pop();
+}
+
+function drawAngle(canvas, base, vec, angle, myColor) {
+    canvas.push();
+    canvas.strokeWeight(2);
+    canvas.noFill();
+    canvas.stroke(myColor);
+    canvas.translate(base.x, base.y);
+    let vec_left = vec.copy().rotate(angle/2);
+    let vec_right = vec.copy().rotate(-angle/2);
+    canvas.line(0, 0, vec_left.x, vec_left.y);
+    canvas.line(0, 0, vec_right.x, vec_right.y);
+    canvas.pop();
+}
