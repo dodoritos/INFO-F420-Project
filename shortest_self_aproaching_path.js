@@ -9,6 +9,7 @@ var pointsInside = [];
 var isPolygonClosed = false;
 var redLines = [];
 var blueLines = [];
+var orangeLines = [];
 var isConvex = [];
 
 
@@ -47,9 +48,18 @@ function closePolygon() {
       redLines.push([points[points.length-1], points[0]]);
     }
   }
-  computeConvexList();
-  let ear = findEar();
-  blueLines.push([ear[0], ear[2]]);
+  isConvex = computeConvexList(points);
+  let tr = triangulate(points);
+  spt = shortestPathTree(points, 0);
+  console.log(spt);
+  showSPT(spt);
+}
+
+function showSPT(spt){
+  for (const i in spt.childs){
+    blueLines.push([spt.childs[i].label, spt.label]);
+    showSPT(spt.childs[i]);
+  }
 }
 
 /**
@@ -75,24 +85,25 @@ function isPointInPolygone(p, poly){
 
 /**
  * return the right-most point of the polygon.
+ * @param poly The polygone
  * @returns {int}
  */
-function maxXPoint(){
+function maxXPoint(poly){
   let res = 0;
-  let maxi = points[0].x;
-  for (i in points){
-    if (points[i].x > maxi){
-      maxi = points[i].x;
+  let maxi = poly[0].x;
+  for (i in poly){
+    if (poly[i].x > maxi){
+      maxi = poly[i].x;
       res = i;
     }
   }
   return parseInt(res);
 }
 
-function getAnglePointsIndex(i){
+function getAnglePointsIndex(i, poly){
   let p = []
   if (i == 0){
-    p.push(points.length-1);
+    p.push(poly.length-1);
   }
   else{
     p.push(i-1);
@@ -100,7 +111,7 @@ function getAnglePointsIndex(i){
 
   p.push(i);
 
-  if (i >= points.length-1){
+  if (i >= poly.length-1){
     p.push(0);
   }
   else{
@@ -110,25 +121,26 @@ function getAnglePointsIndex(i){
   return p;
 }
 
-function getAnglePoints(i){
-  let indexs = getAnglePointsIndex(i);
-  return [points[indexs[0]], points[indexs[1]], points[indexs[2]]];
+function getAnglePoints(i, poly){
+  let indexs = getAnglePointsIndex(i, poly);
+  return [poly[indexs[0]], poly[indexs[1]], poly[indexs[2]]];
 }
 
-function computeConvexList(){
+
+function computeConvexList(poly){
   let before = [];
   let after = [];
-  let start = maxXPoint();
+  let start = maxXPoint(poly);
   let i = start;
 
-  let abc = getAnglePoints(start);
+  let abc = getAnglePoints(start, poly);
   let a = abc[0];
   let b = abc[1];
   let c = abc[2];
   let isLeftTurnCovex = isLeftTurn(a,b,c);
 
-  while (i < points.length){
-    abc = getAnglePoints(i);
+  while (i < poly.length){
+    abc = getAnglePoints(i, poly);
     a = abc[0];
     b = abc[1];
     c = abc[2];
@@ -137,42 +149,91 @@ function computeConvexList(){
   }
   i = 0;
   while (i < start){
-    abc = getAnglePoints(i);
+    abc = getAnglePoints(i, poly);
     a = abc[0];
     b = abc[1];
     c = abc[2];
     before.push(isLeftTurn(a,b,c) == isLeftTurnCovex);
     i = i+1;
   }
-  isConvex = before.concat(after);
+  return before.concat(after);
+}
+
+function computeFlatList(poly){
+  let res = [];
+  let i = 0;
+
+  while (i < poly.length){
+    abc = getAnglePoints(i, poly);
+    a = abc[0];
+    b = abc[1];
+    c = abc[2];
+    res.push(isPointOfSegment(a,c,b));
+    i = i+1;
+  }
+  return res;
 }
 
 /**
  * return one ear of the polygon
  * @returns {Array}
  */
-function findEar(){
+function findEar(poly, convex){
   let i = 0;
   while (true){
-    if (isConvex[i]){
-      let triangle = getAnglePoints(i);
-      let triangleIndexs = getAnglePointsIndex(i);
+    if (convex[i]){
+      let triangle = getAnglePoints(i, poly);
+      let triangleIndexs = getAnglePointsIndex(i, poly);
       let triangleEmpty = true;
       let j = 0
 
-      while (triangleEmpty && j < points.length){
+      while (triangleEmpty && j < poly.length){
         if (j !== parseInt(triangleIndexs[0]) && j !== parseInt(triangleIndexs[1]) && j !== parseInt(triangleIndexs[2])){
-          triangleEmpty = ! isPointInPolygone(points[j], triangle);
+          triangleEmpty = ! isPointInPolygone(poly[j], triangle);
         }
         j = j+1;
       }
 
       if (triangleEmpty){
-        return triangle;
+        return triangleIndexs;
       }
     }
     i = i+1;
   }
+}
+
+function triangulate(polygone){
+  res = {};
+  res["all"] = [];
+  let poly = [];
+  for (const i in polygone){
+    poly.push(polygone[i]);
+  }
+
+  while (poly.length >= 3){
+    let convex = computeConvexList(poly);
+    let ear = findEar(poly, convex);
+    //orangeLines.push([poly[ear[0]], poly[ear[2]]]);
+    let triangle = new Triangle(poly[ear[0]], poly[ear[1]], poly[ear[2]]);
+    res["all"].push(triangle);
+    let edges = triangle.getEdgesPermutaions();
+    for (const i in edges){
+      let neighbor = res[edges[i]];
+      if (neighbor == null){
+        res[edges[i]] = triangle;
+      }
+      else{
+        triangle.setNeighbor(edges[i][0], edges[i][1], neighbor);
+      }
+    }
+    poly.splice(ear[1],1);
+  }
+
+  //if (poly == 3){
+  //  res["all"].push(new Triangle(poly[0], poly[1], poly[2]));
+  //}
+
+  return res;
 }
 
 function setup() {
@@ -217,6 +278,12 @@ function draw() {
     stroke("blue");
     for (const p in blueLines) {
       drawLine(blueLines[p][0], blueLines[p][1]);
+    }
+  }
+  if (orangeLines.length > 0) {
+    stroke("orange");
+    for (const p in orangeLines) {
+      drawLine(orangeLines[p][0], orangeLines[p][1]);
     }
   }
 

@@ -4,6 +4,10 @@ class Point {
         this.x = x;
         this.y = y;
     }
+
+    toString(){
+      return "(" + this.x + "," + this.y + ")";
+    }
 }
 /**
  * @param {Point} a
@@ -28,7 +32,7 @@ function isLeftTurn(a, b, c) {
  * @param {Point} a
  * @param {Point} b
  * @param {Point} c
- * @return {boolean} true if if the point c is on segement [ab]
+ * @return {boolean} true if the point c is on segement [ab]
  */
 function isPointOfSegment(a, b, c) {
     return distance(a, c) + distance(c, b) == distance(a, b);
