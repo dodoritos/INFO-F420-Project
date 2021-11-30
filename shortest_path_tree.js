@@ -93,45 +93,87 @@ class Funnel{
     let flat = computeFlatList(this.vertices);
     this.vertices.pop();
 
-    if (flat[1] || !convex[0]){
+    if (flat[0] || !convex[0]){
       return 0;
     }
-    if (flat[flat.length - 3] || !convex[convex.length-2]){
+    if (flat[flat.length - 2] || !convex[convex.length-2]){
       return convex.length-2;
     }
 
+    if (this.vertices.length == 2){
+      return this.cusp;
+    }
+
+    let res = this.cusp;
+    let dist = distance(this.vertices[this.cusp], p);
+    if (isIntersection(this.vertices[0], this.vertices[this.vertices.length - 1], this.vertices[this.cusp], p)){
+      let noCrossing = true;
+      for (const j in this.vertices){
+        if (j !== this.cusp && j>0 && noCrossing){
+          noCrossing = ! isIntersection(this.vertices[j], this.vertices[parseInt(j) - 1], this.vertices[this.cusp], p)
+        }
+      }
+      if (noCrossing){
+        return this.cusp;
+      }
+    }
     //check the edges before the cusp
     let i = 1;
-    let noCrossing = true;
-    while (noCrossing && i <= this.cusp){
+    let noCrossing1 = true;
+    while (noCrossing1 && i <= this.cusp){
+      noCrossing1 = isIntersection(this.vertices[0], this.vertices[this.vertices.length - 1], this.vertices[i], p);
       let j = i;
-      while (noCrossing && j > 0){
-        noCrossing = ! isIntersection(this.vertices[j], this.vertices[j-1], this.vertices[i], p);
+      while (noCrossing1 && j > 0){
+        noCrossing1 = ! isIntersection(this.vertices[j], this.vertices[j-1], this.vertices[i], p);
         j-= 1;
       }
       i+= 1;
     }
 
-    if (! noCrossing){
-      return i-2;
+    if (! noCrossing1){
+      dist = 0;
+      for (const j in this.vertices){
+        if (j > i-2 && j <= this.cusp){
+          dist += distance(this.vertices[j], this.vertices[parseInt(j)-1]);
+        }
+      }
+      dist += distance(this.vertices[i-2], p);
+      res = i-2;
     }
 
     //check the edges after the cusp
     i = this.vertices.length - 2;
-    while (noCrossing && i >= this.cusp){
+    let noCrossing2 = true;
+    while (noCrossing2 && i >= this.cusp){
+      noCrossing2 = isIntersection(this.vertices[0], this.vertices[this.vertices.length - 1], this.vertices[i], p);
       let j = i;
-      while (noCrossing && j < this.vertices.length - 1){
-        noCrossing = ! isIntersection(this.vertices[j], this.vertices[j+1], this.vertices[i], p);
+      while (noCrossing2 && j < this.vertices.length - 1){
+        noCrossing2 = ! isIntersection(this.vertices[j], this.vertices[j+1], this.vertices[i], p);
         j+= 1;
       }
       i-= 1;
     }
 
-    if (! noCrossing){
-      return i+2;
+    if (! noCrossing2){
+      if (noCrossing1){
+        return i+2;
+      }
+      else if (i+2 < this.vertices.length) {
+        let dist2 = 0;
+        for (const j in this.vertices){
+          if (j < i+2 && j >= this.cusp){
+            dist2 += distance(this.vertices[j], this.vertices[parseInt(j)+1]);
+          }
+        }
+        dist2 += distance(this.vertices[i+2], p);
+        if (dist2 < dist){
+          res = i+2;
+          dist = dist2;
+        }
+      }
     }
 
-    return this.cusp;
+    return res;
   }
 }
 
@@ -152,9 +194,11 @@ function shortestPathTree(poly, root){
 
 function buildSPT(funnel, triangle, spt){
   let p = triangle.getThirdVertex(funnel.vertices[0], funnel.vertices[funnel.vertices.length - 1]);
-  let prev = funnel.shotestPathTo(p);
-  let tree = new Tree(p);
   console.log(funnel);
+  console.log(p);
+  let prev = funnel.shotestPathTo(p);
+  console.log(prev);
+  let tree = new Tree(p);
 
   let newFunnel1Vertices = funnel.vertices.slice(0, prev+1);
   newFunnel1Vertices.push(p);
@@ -162,6 +206,10 @@ function buildSPT(funnel, triangle, spt){
 
   let newFunnel1 = new Funnel(newFunnel1Vertices, null);
   let newFunnel2 = new Funnel(newFunnel2Vertices, null);
+
+  //blueLines.push([tree.label, funnel.vertices[prev]]);
+  //draw();
+
   if (prev < funnel.cusp){
     spt[0].addChildTo(tree, funnel.vertices[prev]);
     newFunnel1.cusp = newFunnel1.vertices.indexOf(funnel.vertices[prev]);

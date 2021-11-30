@@ -50,6 +50,7 @@ function closePolygon() {
   }
   isConvex = computeConvexList(points);
   let tr = triangulate(points);
+  draw();
   spt = shortestPathTree(points, 0);
   console.log(spt);
   showSPT(spt);
@@ -213,7 +214,9 @@ function triangulate(polygone){
   while (poly.length >= 3){
     let convex = computeConvexList(poly);
     let ear = findEar(poly, convex);
-    //orangeLines.push([poly[ear[0]], poly[ear[2]]]);
+//    if (poly.length > 3){
+//      orangeLines.push([poly[ear[0]], poly[ear[2]]]);
+//    }
     let triangle = new Triangle(poly[ear[0]], poly[ear[1]], poly[ear[2]]);
     res["all"].push(triangle);
     let edges = triangle.getEdgesPermutaions();
@@ -323,6 +326,7 @@ function resetPoints() {
   convexHullPoints = [];
   isPolygonClosed = false;
   redLines = [];
+  orangeLines = [];
   pointsInside = [];
   isConvex = [];
   blueLines = [];
