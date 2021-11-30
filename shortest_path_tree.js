@@ -201,6 +201,17 @@ class Funnel{
   }
 }
 
+function pathDist(path){
+  res = 0
+  for (const i in path){
+    if (i > 0){
+      let j = parseInt(i);
+      res += distance(path[j-1], path[j]);
+    }
+  }
+  return res;
+}
+
 function isVisibleFrom(poly ,s, t){
   for (const i in poly){
     let j = parseInt(i);
@@ -218,10 +229,10 @@ function findStart(triangles, s, t){
   let res = [null, null];
   for (const i in triangles["all"]){
     if (triangles["all"][i].isPointInside(s)){
-      res[0] = triangles["all"][i].p1;
+      res[0] = triangles["all"][i];
     }
     if (triangles["all"][i].isPointInside(t)){
-      res[1] = triangles["all"][i].p1;
+      res[1] = triangles["all"][i];
     }
   }
   return res;
@@ -229,16 +240,48 @@ function findStart(triangles, s, t){
 
 function geodesicPath(poly, s, t){
   if (isVisibleFrom(poly, s, t)){
+    console.log("visible");
     return [s, t];
   }
   let triangles = triangulate(poly);
-  let roots = findStart(triangles, s, t);
-  let treeNodeT = shortestPathTree(poly, triangles, poly.indexOf(roots[0]), t);
-  let sPathT = treeNodeT.pathToRoot();
-  let treeNodeS = shortestPathTree(poly, triangles, poly.indexOf(roots[1]), s);
-  let sPathS = treeNodeS.pathToRoot();
-  let prevS = sPathS[sPathS.length - 2];
-  return [s].concat(sPathT.slice(sPathT.indexOf(prevS), sPathT.length));
+  let startTriangles = findStart(triangles, s, t);
+  let pathsToT = shortestPathToTriangle(poly, triangles, startTriangles[0], t);
+  let pathsToS = shortestPathToTriangle(poly, triangles, startTriangles[1], s);
+  return bestJoinPath(pathsToS, pathsToT);
+}
+
+function bestJoinPath(paths1, paths2){
+  let best = null;
+  let bestSize = null;
+  for (const i in paths1){
+    for (const j in paths2){
+      let chal = joinPath(paths1[i], paths2[j]);
+      chalSize = pathDist(chal);
+      if (chal.length > 2 && (bestSize == null || chalSize < bestSize)){
+        best = chal;
+        bestSize = chalSize;
+      }
+    }
+  }
+  return best;
+}
+
+function joinPath(path1, path2){
+  let s = path1[path1.length - 1];
+  let t = path2[path2.length - 1];
+  let prevS = path1[path1.length - 2];
+  return [s].concat(path2.slice(path2.indexOf(prevS), path2.length));
+}
+
+function shortestPathToTriangle(poly, triangles, triangle, p){
+  let res = [];
+  let pathEnd = shortestPathTree(poly, triangles, poly.indexOf(triangle.p1), p);
+  res.push(pathEnd.pathToRoot());
+  pathEnd = shortestPathTree(poly, triangles, poly.indexOf(triangle.p2), p);
+  res.push(pathEnd.pathToRoot());
+  pathEnd = shortestPathTree(poly, triangles, poly.indexOf(triangle.p3), p);
+  res.push(pathEnd.pathToRoot());
+  return res;
 }
 
 function shortestPathTree(poly, triangles, root, obj = null){
@@ -268,6 +311,7 @@ function buildSPT(funnel, triangle, spt, obj){
   let tree = new Tree(p);
   if (isObjInTriangle){
     spt[0].addChildTo(tree, funnel.vertices[prev]);
+    spt[1].addChildTo(tree, funnel.vertices[prev]);
     return tree;
   }
 
