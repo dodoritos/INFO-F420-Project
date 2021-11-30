@@ -49,11 +49,6 @@ function closePolygon() {
     }
   }
   isConvex = computeConvexList(points);
-  let tr = triangulate(points);
-  draw();
-  spt = shortestPathTree(points, 0);
-  console.log(spt);
-  showSPT(spt);
 }
 
 function showSPT(spt){
@@ -295,7 +290,7 @@ function draw() {
     drawPoint(pointsInside[0]);
     if (pointsInside.length > 1) {
       drawPoint(pointsInside[1]);
-      drawLine(pointsInside[0], pointsInside[1]);
+      //drawLine(pointsInside[0], pointsInside[1]);
     }
   }
 }
@@ -307,6 +302,15 @@ function addPoint() {
   if (isPolygonClosed) {
     if (isPointInPolygone(newPoint, points)){
       pointsInside.push(newPoint);
+      if (pointsInside.length > 1){
+        geoPath = geodesicPath(points, pointsInside[0], pointsInside[1]);
+        for (const i in geoPath){
+          let j = parseInt(i);
+          if (j > 0){
+            blueLines.push([geoPath[j-1], geoPath[j]]);
+          }
+        }
+      }
     }
   } else {
     if (

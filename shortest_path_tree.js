@@ -53,6 +53,15 @@ class Triangle{
     return this.getEdges().concat([[this.p2,this.p1], [this.p3,this.p2], [this.p1,this.p3]]);
   }
 
+  isPointInside(p){
+    return isPointInPolygone(p, [this.p1, this.p2, this.p3]);
+  }
+
+  draw(){
+    orangeLines = orangeLines.concat(this.getEdges());
+    draw();
+  }
+
 }
 
 class Tree{
@@ -78,12 +87,27 @@ class Tree{
       this.parent.addChildTo(child, parent);
     }
   }
+  pathToRoot(){
+    if (this.parent == null){
+      return [this.label];
+    }
+    res = this.parent.pathToRoot();
+    res.push(this.label);
+    return res;
+  }
 }
 
 class Funnel{
   constructor(vertices, cusp){
     this.vertices = vertices; // Array of at least 2 points in the order from the first end of the funnel to the other.
     this.cusp = cusp; // index of the cusp in this.vertices
+  }
+
+  isPointInside(p){
+    if (this.vertices.length <= 2){
+      return false;
+    }
+    return isPointInPolygone(p, this.vertices);
   }
 
   shotestPathTo(p){
@@ -177,8 +201,47 @@ class Funnel{
   }
 }
 
-function shortestPathTree(poly, root){
+function isVisibleFrom(poly ,s, t){
+  for (const i in poly){
+    let j = parseInt(i);
+    if (i > 0 && isIntersection(poly[i-1], poly[i], s, t)){
+      return false;
+    }
+  }
+  if (isIntersection(poly[0], poly[poly.length -1], s, t)){
+    return false;
+  }
+  return true;
+}
+
+function findStart(triangles, s, t){
+  let res = [null, null];
+  for (const i in triangles["all"]){
+    if (triangles["all"][i].isPointInside(s)){
+      res[0] = triangles["all"][i].p1;
+    }
+    if (triangles["all"][i].isPointInside(t)){
+      res[1] = triangles["all"][i].p1;
+    }
+  }
+  return res;
+}
+
+function geodesicPath(poly, s, t){
+  if (isVisibleFrom(poly, s, t)){
+    return [s, t];
+  }
   let triangles = triangulate(poly);
+  let roots = findStart(triangles, s, t);
+  let treeNodeT = shortestPathTree(poly, triangles, poly.indexOf(roots[0]), t);
+  let sPathT = treeNodeT.pathToRoot();
+  let treeNodeS = shortestPathTree(poly, triangles, poly.indexOf(roots[1]), s);
+  let sPathS = treeNodeS.pathToRoot();
+  let prevS = sPathS[sPathS.length - 2];
+  return [s].concat(sPathT.slice(sPathT.indexOf(prevS), sPathT.length));
+}
+
+function shortestPathTree(poly, triangles, root, obj = null){
   let nextVertex = root - 1;
   if (root == 0){
     nextVertex = poly.length - 1;
@@ -187,18 +250,26 @@ function shortestPathTree(poly, root){
   let treeRoot = new Tree(poly[root]);
   let child = new Tree(poly[nextVertex]);
   treeRoot.addChild(child);
-  buildSPT(funnel, triangles[funnel.vertices], [treeRoot, child]);
-
+  let res = buildSPT(funnel, triangles[funnel.vertices], [treeRoot, child], obj);
+  if (obj !== null){
+    return res;
+  }
   return treeRoot;
 }
 
-function buildSPT(funnel, triangle, spt){
+function buildSPT(funnel, triangle, spt, obj){
+  let res = null;
+  let isObjInTriangle = obj !== null && triangle.isPointInside(obj);
   let p = triangle.getThirdVertex(funnel.vertices[0], funnel.vertices[funnel.vertices.length - 1]);
-  console.log(funnel);
-  console.log(p);
+  if (isObjInTriangle){
+    p = obj;
+  }
   let prev = funnel.shotestPathTo(p);
-  console.log(prev);
   let tree = new Tree(p);
+  if (isObjInTriangle){
+    spt[0].addChildTo(tree, funnel.vertices[prev]);
+    return tree;
+  }
 
   let newFunnel1Vertices = funnel.vertices.slice(0, prev+1);
   newFunnel1Vertices.push(p);
@@ -223,12 +294,18 @@ function buildSPT(funnel, triangle, spt){
 
   let nextTriangle = triangle.getNeighbor(newFunnel1.vertices[0], newFunnel1.vertices[newFunnel1.vertices.length-1]);
   if (nextTriangle !== null){
-    buildSPT(newFunnel1, nextTriangle, [spt[0], tree]);
+    res = buildSPT(newFunnel1, nextTriangle, [spt[0], tree], obj);
+    if (res !== null){
+      return res;
+    }
   }
 
   nextTriangle = triangle.getNeighbor(newFunnel2.vertices[0], newFunnel2.vertices[newFunnel2.vertices.length-1]);
   if (nextTriangle !== null){
-    buildSPT(newFunnel2, nextTriangle, [tree, spt[1]]);
+    res = buildSPT(newFunnel2, nextTriangle, [tree, spt[1]], obj);
+    if (res !== null){
+      return res;
+    }
   }
-
+  return res;
 }
