@@ -53,8 +53,50 @@ class InvoluteOfCircle {
     draw(canvas, start_rad, end_rad, display_lines) {
         if (end_rad < start_rad)
             [end_rad, start_rad] = [start_rad, end_rad];
-        canvas.noFill();
-        canvas.stroke('red');
+        canvas.beginShape();
+        for (let o = start_rad; o <= end_rad; o += PI/40) {
+            let point = this.get_point(o).add(this.circle.center);
+            canvas.vertex(point.x, point.y);
+        }
+        let point = this.get_point(end_rad).add(this.circle.center);
+        canvas.vertex(point.x, point.y);
+        canvas.endShape();
+        if (display_lines) {
+            canvas.stroke('black');
+            let c1 = this.circle.get_point(start_rad).add(this.circle.center);
+            let p1 = this.get_point(start_rad).add(this.circle.center);
+            canvas.line(c1.x, c1.y, p1.x, p1.y);
+            let c2 = this.circle.get_point(end_rad).add(this.circle.center);
+            let p2 = this.get_point(end_rad).add(this.circle.center);
+            canvas.line(c2.x, c2.y, p2.x, p2.y);
+        }
+    }
+}
+
+class SecondInvoluteOfCircle {
+    constructor(circle, degree_of_start) {
+        this.circle = circle;
+        this.degree_of_start = degree_of_start;
+    }
+
+    /** return a point relative to the center (0,0)
+     * @param {number} angle the angle of the relative circle
+     */
+    get_point(angle) {
+        let r = this.circle.range;
+        let sin = Math.sin(angle);
+        let cos = Math.cos(angle);
+        let frac = (angle*angle)/2;
+        return createVector(r*(cos+angle*sin-cos*frac),r*(sin-angle*cos-sin*frac));
+    }
+
+    get_tangent_vector(angle) {
+        return p5.Vector.fromAngle(angle + HALF_PI);
+    }
+
+    draw(canvas, start_rad, end_rad, display_lines) {
+        if (end_rad < start_rad)
+            [end_rad, start_rad] = [start_rad, end_rad];
         canvas.beginShape();
         for (let o = start_rad; o <= end_rad; o += PI/40) {
             let point = this.get_point(o).add(this.circle.center);
@@ -105,6 +147,7 @@ var t = function( p ) {
         p.stroke('black');
         p.noFill();
         c.draw(p);
+        p.stroke('red');
         involute.draw(p, start*PI, end*PI, true);
     }
 

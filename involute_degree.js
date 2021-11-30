@@ -25,6 +25,7 @@ var t = function( p ) {
         p.stroke('black');
         p.noFill();
         c.draw(p);
+        p.stroke('red');
         involute.draw(p, 0, 2*PI, false);
         drawAngle(p, involute.get_point(angle).add(c.center), involute.get_tangent_vector(angle).rotate(QUARTER_PI).setMag(200), HALF_PI, 'black');
     }
