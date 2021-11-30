@@ -27,6 +27,7 @@ var t = function( p ) {
         p.stroke('black');
         p.noFill();
         c.draw(p);
+        p.stroke('red');
         involute.draw(p, 0, 3*PI, false);
         drawArrow(p, involute.get_point(vector_position).add(c.center), involute.get_point(vector_position).rotate(PI), 'black');
     }
