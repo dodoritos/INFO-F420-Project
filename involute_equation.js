@@ -1,6 +1,7 @@
 
 var startSlider = document.getElementById("startSlider");
 var endSlider = document.getElementById("endSlider");
+var rotationSlider = document.getElementById("rotationSlider");
 
 function lineAngle(p1, p2){
   return Math.atan2((p2.y - p1.y), (p2.x - p1.x));
@@ -54,7 +55,7 @@ class InvoluteOfCircle {
         let r = this.circle.range;
         let sin = Math.sin(angle);
         let cos = Math.cos(angle);
-        return createVector(r*(cos+angle*sin),r*(sin-angle*cos));
+        return createVector(r*(cos+(angle-this.degree_of_start)*sin),r*(sin-(angle-this.degree_of_start)*cos));
     }
 
     getType(){
@@ -77,6 +78,7 @@ class InvoluteOfCircle {
             let point = this.get_point(o).add(this.circle.center);
             canvas.vertex(point.x, point.y);
         }
+
         let point = this.get_point(end_rad).add(this.circle.center);
         canvas.vertex(point.x, point.y);
         canvas.endShape();
@@ -113,8 +115,9 @@ class SecondInvoluteOfCircle {
         let r = this.circle.range;
         let sin = Math.sin(angle);
         let cos = Math.cos(angle);
-        let frac = (angle*angle)/2;
-        return createVector(r*(cos+angle*sin-cos*frac),r*(sin-angle*cos-sin*frac));
+        let frac = ((angle-this.degree_of_start)*(angle-this.degree_of_start))/2;
+        // return createVector(r*(cos+angle*sin-cos*frac),r*(sin-angle*cos-sin*frac));
+        return createVector(r*(cos+(angle-this.degree_of_start)*sin-cos*frac),r*(sin-(angle-this.degree_of_start)*cos-sin*frac));
     }
 
     get_tangent_vector(angle) {
@@ -149,32 +152,40 @@ var t = function( p ) {
     document.getElementById("startSpan").innerHTML = start;
     var end = 4*endSlider.value/endSlider.max;
     document.getElementById("endSpan").innerHTML = end;
+    var angle = 4*rotationSlider.value/rotationSlider.max;
+    document.getElementById("rotationSpan").innerHTML = angle;
+
     var c;
     var involute;
     startSlider.oninput = function() {
         start = 4*this.value/this.max;
-        document.getElementById("startSpan").innerHTML = start;
         redraw()
     }
     endSlider.oninput = function() {
         end = 4*this.value/this.max;
-        document.getElementById("endSpan").innerHTML = end;
+        redraw()
+    }
+    rotationSlider.oninput = function() {
+        angle = 4*this.value/this.max;
         redraw()
     }
 
     p.setup = function() {
-        p.createCanvas(800, 600);
-        c = new CircleEq(30, createVector(400,300));
-        involute = new InvoluteOfCircle(c, 0);
+        p.createCanvas(400, 400);
+        c = new CircleEq(15, createVector(200,200));
         redraw();
     };
 
     function redraw() {
+        document.getElementById("rotationSpan").innerHTML = angle;
+        document.getElementById("endSpan").innerHTML = end;
+        document.getElementById("startSpan").innerHTML = start;
         p.background(200);
         p.stroke('black');
         p.noFill();
         c.draw(p);
         p.stroke('red');
+        involute = new InvoluteOfCircle(c, angle*PI);
         involute.draw(p, start*PI, end*PI, true);
     }
 

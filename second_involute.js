@@ -1,16 +1,18 @@
 var t = function( p ) {
-    var angle;
+    var draw_angle;
+    var start_angle;
 
     var c;
     var involute;
     var second_involute;
 
     p.setup = function() {
-        p.createCanvas(800, 600);
-        angle = 2*PI;
-        c = new CircleEq(30, createVector(600,250));
-        involute = new InvoluteOfCircle(c, 0);
-        second_involute = new SecondInvoluteOfCircle(c, 0);
+        p.createCanvas(700, 500);
+        draw_angle = 2*PI;
+        c = new CircleEq(100, createVector(550,190));
+        start_angle = HALF_PI/2;
+        involute = new InvoluteOfCircle(c, start_angle);
+        second_involute = new SecondInvoluteOfCircle(c, start_angle);
         redraw();
     };
 
@@ -19,9 +21,10 @@ var t = function( p ) {
         p.stroke('black');
         p.noFill();
         c.draw(p);
+        p.stroke('purple');
+        involute.draw(p, start_angle, draw_angle, false);
         p.stroke('red');
-        involute.draw(p, 0, angle, false);
-        second_involute.draw(p, 0, angle, false);
+        second_involute.draw(p, start_angle, draw_angle, false);
     }
 
     p.draw = function() {
