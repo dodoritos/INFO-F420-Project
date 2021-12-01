@@ -18,6 +18,22 @@ function distance(a, b){
     return sqrt((a.x-b.x)**2 + (a.y-b.y)**2);
 }
 
+function computeIntersection(a, b, c, d){
+  m = a.y - b.y;
+  n = b.x - a.x;
+  o = -(a.x*b.y - b.x*a.y);
+
+  s = c.y - d.y;
+  t = d.x - c.x;
+  u = -(c.x*d.y - d.x*c.y);
+
+  div = m*t - n*s;
+  if (div == 0){
+    return null;
+  }
+  return new Point((o*t - n*u)/div, (m*u - o*s)/div);
+}
+
 /**
  * @param {Point} a
  * @param {Point} b

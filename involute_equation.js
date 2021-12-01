@@ -2,6 +2,9 @@
 var startSlider = document.getElementById("startSlider");
 var endSlider = document.getElementById("endSlider");
 
+function lineAngle(p1, p2){
+  return Math.atan2((p2.y - p1.y), (p2.x - p1.x));
+}
 
 class CircleEq {
     /**
@@ -11,6 +14,10 @@ class CircleEq {
     constructor(range, center) {
         this.range = range;
         this.center = center;
+    }
+
+    getType(){
+      return "circle";
     }
 
     draw(canvas) {
@@ -28,6 +35,10 @@ class CircleEq {
     get_point(angle) {
         return createVector(this.range * Math.cos(angle), this.range*Math.sin(angle));
     }
+
+    isPointInside(p){
+      return distance(p, this.center) < this.range;
+    }
 }
 
 class InvoluteOfCircle {
@@ -44,6 +55,14 @@ class InvoluteOfCircle {
         let sin = Math.sin(angle);
         let cos = Math.cos(angle);
         return createVector(r*(cos+angle*sin),r*(sin-angle*cos));
+    }
+
+    getType(){
+      return "Involute1";
+    }
+
+    isPointInside(p){
+      return distance(p, this.circle.center) < distance(this.get_point(lineAngle(p, this.circle.center)).add(this.circle.center), this.circle.center);
     }
 
     get_tangent_vector(angle) {
@@ -77,6 +96,14 @@ class SecondInvoluteOfCircle {
     constructor(circle, degree_of_start) {
         this.circle = circle;
         this.degree_of_start = degree_of_start;
+    }
+
+    getType(){
+      return "Involute2";
+    }
+
+    isPointInside(p){
+      return distance(p, this.circle.center) < distance(this.get_point(lineAngle(p, this.circle.center)).add(this.circle.center), this.circle.center);
     }
 
     /** return a point relative to the center (0,0)

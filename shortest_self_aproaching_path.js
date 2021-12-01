@@ -11,6 +11,148 @@ var redLines = [];
 var blueLines = [];
 var orangeLines = [];
 var isConvex = [];
+var path = [];
+
+class PathPart{
+  constructor(start, end, eq = null){
+    this.start = start;
+    this.end = end;
+    this.eq = eq;
+    this.redZone = null;
+    this.computeRedZone(start);
+  }
+  computeRedZone(p){
+    if(this.eq == null){ // line
+      this.redZone = new CircleEq(distance(this.start, p), createVector(this.start.x, this.start.y));
+    }
+    else if(this.eq.getType() == "circle"){
+      this.eq.range = distance(this.start, p);
+      this.redZone = new InvoluteOfCircle(this.eq, lineAngle(start, this.eq.center));
+    }
+    else if(this.eq.getType() == "Involute1"){
+      this.eq.circle.range = distance(this.start, p);
+      this.redZone = new InvoluteOfCircle(this.eq.circle, lineAngle(start, this.eq.circle.center));
+    }
+    else if(this.eq.getType() == "Involute2"){
+      //should be done for Involute k and do k+1;
+      console.log("Involute of order higher than 2 not implemented");
+    }
+
+  }
+  isPointInRedZone(p){
+    return this.redZone.isPointInside(p);
+  }
+  draw(){
+    if (this.eq == null){
+      orangeLines.push([this.start, this.end]);
+    }
+    else if(this.eq.getType() == "circle"){
+      this.eq.draw(canvas, lineAngle(this.start, this.eq.center), lineAngle(this.end, this.eq.center), false);
+    }
+    else{
+      this.eq.draw(canvas, lineAngle(this.start, this.eq.circle.center), lineAngle(this.end, this.eq.circle.center), false);
+    }
+  }
+}
+
+function isPointInsidePathCH(p, prev) {
+  for (const i in path){
+    path[i].computeRedZone(prev);
+    if (path[i].isPointInRedZone(p)){
+      return true;
+    }
+  }
+  return false
+}
+
+function rayShoot(p, end, poly, searchLine = false){
+  let best = null;
+  let bestDist = null;
+  for (const i in poly){
+    let j = parseInt(i) - 1;
+    if (j == -1){
+      j = poly.length-1;
+    }
+    if (isLineCrossingSegment(p, end, poly[i], poly[j])){
+      let intersection = computeIntersection(p, end, poly[i], poly[j]);
+      let dist = distance(p, intersection);
+      if((bestDist == null || bestDist > dist) && !isPointOfSegment(p, intersection, end)){
+        if (searchLine){
+          best = [j,i];
+        }
+        else{
+          best = intersection;
+        }
+        bestDist = dist;
+      }
+    }
+  }
+  return res;
+}
+
+function chains(geodesic, poly){
+  let a = rayShoot(geodesic[0], geodesic[1], poly, true);
+  let b = rayShoot(geodesic[geodesic.length-1], geodesic[geodesic.length-2], poly, true);
+  let lChain = [];
+  let rChain = [];
+  let i = b[1];
+  while(i !== a[1]){
+    lChain.push(poly[i]);
+    i += 1;
+    if (i = poly.length){
+      i = 0;
+    }
+  }
+  while(i !== b[1]){
+    rChain.push(poly[i]);
+    i += 1;
+    if (i = poly.length){
+      i = 0;
+    }
+  }
+  return [lChain, rChain];
+}
+
+
+function shortestSelfApprochingPath(poly, geodesic, triangles=null){
+  let lrChains = chains(geodesic, poly);
+  let lChain = lrChains[0];
+  let rChain = lrChains[1];
+  let current = geodesic.pop();
+  let next = geodesic.pop();
+  let isLChain = lChain.indexOf(current) !== -1;
+  path.push(new PathPart(t, next));
+
+  while (geodesic.length > 0){
+    current = next;
+    isLChain = lChain.indexOf(current) !== -1;
+    next = geodesic.pop();
+    let direct = true;
+    console.log(next);
+    while (isPointInsidePathCH(next, current)){
+      direct = false;
+      if (geodesic.length == 0){
+        console.log("no available path");
+        return null;
+      }
+      next = geodesic.pop();
+      console.log(next);
+    }
+
+    if (direct){
+      path.push(new PathPart(t, next));
+    }
+    else{
+      console.log("todo");
+    }
+    for (const i in path){
+      path[i].draw();
+    }
+
+
+  }
+}
+
 
 
 /**
@@ -198,6 +340,8 @@ function findEar(poly, convex){
   }
 }
 
+
+
 function triangulate(polygone){
   res = {};
   res["all"] = [];
@@ -234,6 +378,7 @@ function triangulate(polygone){
   return res;
 }
 
+
 function setup() {
   var buttonClear = createButton("Clear");
   buttonClear.parent("canvas");
@@ -244,7 +389,7 @@ function setup() {
   buttonClose.mousePressed(closePolygon);
 
   createP('').parent("canvas"); // new line
-  let canvas = createCanvas(400, 400);
+  var canvas = createCanvas(400, 400);
   canvas.parent("canvas");
   canvas.mousePressed(addPoint);
 }
@@ -304,12 +449,14 @@ function addPoint() {
       pointsInside.push(newPoint);
       if (pointsInside.length > 1){
         geoPath = geodesicPath(points, pointsInside[0], pointsInside[1]);
-        for (const i in geoPath){
-          let j = parseInt(i);
-          if (j > 0){
-            blueLines.push([geoPath[j-1], geoPath[j]]);
-          }
-        }
+        shortestSelfApprochingPath(points, geoPath);
+
+        //for (const i in geoPath){
+          //let j = parseInt(i);
+          //if (j > 0){
+            //blueLines.push([geoPath[j-1], geoPath[j]]);
+          //}
+        //}
       }
     }
   } else {
@@ -334,4 +481,5 @@ function resetPoints() {
   pointsInside = [];
   isConvex = [];
   blueLines = [];
+  path = [];
 }
