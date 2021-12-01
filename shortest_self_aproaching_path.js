@@ -4,6 +4,8 @@ const CANVA_X_RIGHT = 600;
 const CANVA_Y_UP = 100;
 const CANVA_Y_DOWN = 500;
 
+var canvas;
+
 var points = [];
 var pointsInside = [];
 var isPolygonClosed = false;
@@ -121,7 +123,7 @@ function shortestSelfApprochingPath(poly, geodesic, triangles=null){
   let current = geodesic.pop();
   let next = geodesic.pop();
   let isLChain = lChain.indexOf(current) !== -1;
-  path.push(new PathPart(t, next));
+  path.push(new PathPart(current, next));
 
   while (geodesic.length > 0){
     current = next;
@@ -140,7 +142,7 @@ function shortestSelfApprochingPath(poly, geodesic, triangles=null){
     }
 
     if (direct){
-      path.push(new PathPart(t, next));
+      path.push(new PathPart(current, next));
     }
     else{
       console.log("todo");
@@ -379,6 +381,7 @@ function triangulate(polygone){
 }
 
 
+
 function setup() {
   var buttonClear = createButton("Clear");
   buttonClear.parent("canvas");
@@ -387,11 +390,11 @@ function setup() {
   var buttonClose = createButton("Close polygon");
   buttonClose.parent("canvas");
   buttonClose.mousePressed(closePolygon);
-
   createP('').parent("canvas"); // new line
-  var canvas = createCanvas(400, 400);
+  canvas = createCanvas(400, 400);
   canvas.parent("canvas");
   canvas.mousePressed(addPoint);
+
 }
 
 
@@ -425,6 +428,7 @@ function draw() {
   }
   if (orangeLines.length > 0) {
     stroke("orange");
+    console.log(orangeLines);
     for (const p in orangeLines) {
       drawLine(orangeLines[p][0], orangeLines[p][1]);
     }
@@ -449,14 +453,14 @@ function addPoint() {
       pointsInside.push(newPoint);
       if (pointsInside.length > 1){
         geoPath = geodesicPath(points, pointsInside[0], pointsInside[1]);
-        shortestSelfApprochingPath(points, geoPath);
+        //shortestSelfApprochingPath(points, geoPath);
 
-        //for (const i in geoPath){
-          //let j = parseInt(i);
-          //if (j > 0){
-            //blueLines.push([geoPath[j-1], geoPath[j]]);
-          //}
-        //}
+        for (const i in geoPath){
+          let j = parseInt(i);
+          if (j > 0){
+            blueLines.push([geoPath[j-1], geoPath[j]]);
+          }
+        }
       }
     }
   } else {
