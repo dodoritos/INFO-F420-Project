@@ -76,9 +76,10 @@ class InvoluteOfCircle {
 }
 
 class SecondInvoluteOfCircle {
-    constructor(circle, degree_of_start) {
+    constructor(circle, degree_of_start, second_degree_of_start) {
         this.circle = circle;
         this.degree_of_start = degree_of_start;
+        this.second_degree_of_start = second_degree_of_start;
     }
 
     /** return a point relative to the center (0,0)
@@ -88,7 +89,8 @@ class SecondInvoluteOfCircle {
         let r = this.circle.range;
         let sin = Math.sin(angle);
         let cos = Math.cos(angle);
-        let frac = ((angle-this.degree_of_start)*(angle-this.degree_of_start))/2;
+        // let frac = ((angle-this.degree_of_start)*(angle-this.degree_of_start))/2;
+        let frac = (angle*angle)/2-(angle*this.degree_of_start) - (this.second_degree_of_start*this.second_degree_of_start/2 - this.degree_of_start*this.second_degree_of_start);
         // return createVector(r*(cos+angle*sin-cos*frac),r*(sin-angle*cos-sin*frac));
         return createVector(r*(cos+(angle-this.degree_of_start)*sin-cos*frac),r*(sin-(angle-this.degree_of_start)*cos-sin*frac));
     }
