@@ -88,8 +88,9 @@ class SecondInvoluteOfCircle {
         let r = this.circle.range;
         let sin = Math.sin(angle);
         let cos = Math.cos(angle);
-        let frac = (angle*angle)/2;
-        return createVector(r*(cos+angle*sin-cos*frac),r*(sin-angle*cos-sin*frac));
+        let frac = ((angle-this.degree_of_start)*(angle-this.degree_of_start))/2;
+        // return createVector(r*(cos+angle*sin-cos*frac),r*(sin-angle*cos-sin*frac));
+        return createVector(r*(cos+(angle-this.degree_of_start)*sin-cos*frac),r*(sin-(angle-this.degree_of_start)*cos-sin*frac));
     }
 
     get_tangent_vector(angle) {
