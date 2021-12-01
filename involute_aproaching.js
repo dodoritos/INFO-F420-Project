@@ -9,16 +9,16 @@ var t = function( p ) {
     var involute;
     animationSlider.oninput = function() {
         vector_position = 3*PI*this.value/this.max;
-        distanceSpan.innerHTML =  involute.get_point(vector_position).mag();
+        distanceSpan.innerHTML = involute.get_point(vector_position).mag().toFixed(2);
         redraw()
     }
 
     p.setup = function() {
-        p.createCanvas(800, 600);
-        c = new CircleEq(30, createVector(400,300));
+        p.createCanvas(400, 400);
+        c = new CircleEq(20, createVector(200,200));
         involute = new InvoluteOfCircle(c, 0);
         vector_position = 3*PI*animationSlider.value/animationSlider.max;
-        distanceSpan.innerHTML =  involute.get_point(vector_position).mag();
+        distanceSpan.innerHTML =  involute.get_point(vector_position).mag().toFixed(2);
         redraw();
     };
 

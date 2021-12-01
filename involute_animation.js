@@ -20,7 +20,7 @@ var s = function( p ) {
         var tengent_point = relative_point.copy();
         tengent_point.rotate(-HALF_PI);
         var angle = 0;
-        let delta = -HALF_PI/10;
+        let delta = -PI/40;
 
 
         if (delta*step_to_output<-TWO_PI) {
@@ -35,7 +35,7 @@ var s = function( p ) {
         p.noFill();
         p.stroke('red');
         p.beginShape();
-        for (let i = 0; i < 100; i++) {
+        for (let i = 0; i < 80; i++) {
             // console.log(relative_point.toString());
             let tg_copy = tengent_point.copy().setMag(radius*angle);
             var drawing_point = relative_point.copy();
@@ -58,7 +58,7 @@ var s = function( p ) {
         return output_vectors;
     }
 
-    var starting_point = p.createVector(450, 300);
+    var starting_point = p.createVector(230, 200);
     var step = slider.value;
 
     slider.oninput = function() {
@@ -70,14 +70,14 @@ var s = function( p ) {
 
 
     p.setup = function() {
-        var canvas = p.createCanvas(800, 600);
+        var canvas = p.createCanvas(400, 400);
         canvas.mousePressed(move_point);
     };
 
     p.draw = function() {
         p.background(200);
         p.fill(200);
-        let tengent_line = draw_involute_of_circle(createVector(400, 300), starting_point, COUNTER_CLOCK_WISE, step);
+        let tengent_line = draw_involute_of_circle(createVector(200, 200), starting_point, COUNTER_CLOCK_WISE, step);
         if (tengent_line.length > 0) {
             p.stroke('purple')
             p.line(tengent_line[0].x, tengent_line[0].y, tengent_line[1].x, tengent_line[1].y);

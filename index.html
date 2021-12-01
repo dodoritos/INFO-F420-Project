@@ -13,24 +13,18 @@
   </head>
   <body>
     <h1>INFO-F420 - Computational geometry project</h1>
-    <h2>Self-Approaching Paths in Simple Polygons</h2>
-    <p>You will find several illustations of the conceps presented in the paper</p>
+    <h1>Self-Approaching Paths in Simple Polygons</h1>
+    <p>A self approaching path between two points is a curve such that when you move along the curve the distance
+    to any further point does not increase.</p>
 
-    <h3>Given two points inside a simple polygon, does there exist a self-approaching path inside it?</h3>
-
-    <div id="canvas"></div>
-
-    <script src="shortest_self_aproaching_path.js"></script>
-
-    <h3>Find the shortest self-approaching path.</h3>
-    <h3>Given a point s in a simple polygon P, what is the set of all points reach-able from s with self-approaching paths?</h3>
-    <h3>Given a point t, what is the set of all points from which t is reachable with a self-approaching path?</h3>
-    <h3>Given  a  polygonP,  test  if  it  is  self-approaching,  i.e.,  if  there  exists  aself-approaching path between any two points inP.</h3>
-
+    <h2>Important concepts</h2>
     <h3>Involute</h3>
-    <p>You can slide to see the step of execution, or click on the canva to change the size and orientation of the circle</p>
+    <p>An involute is a curve that depends on another curve. It's traced by unwrapping a string around the original curve</p>
+    <p>For the Self-approaching path algorithm, we will only use involutes of circles, here you can see an example of such a curve</p>
+    <p>You can slide to see the step of execution, or click on the canva to change the size and orientation of the circle.
+      The involute is in red and the unwrapping string is in purple.</p>
 
-    <input type="range" min="0" max="99" value="50" class="slider" id="stepSlider">
+    <input type="range" min="0" max="79" value="50" class="slider" id="stepSlider">
     <div id="involute"></div>
     <script src="involute_animation.js"></script>
 
@@ -39,6 +33,8 @@
     <input type="range" min="0" max="100" value="10" class="slider" id="startSlider">
     <p>End: <span id="endSpan"></span>&pi;</p>
     <input type="range" min="0" max="100" value="20" class="slider" id="endSlider">
+    <p>Rotation: <span id="rotationSpan"></span>&pi;</p>
+    <input type="range" min="0" max="100" value="20" class="slider" id="rotationSlider">
     <div id="involute_equation"></div>
     <script src="involute_equation.js"></script>
 
@@ -53,14 +49,41 @@
     <div id="involute_aproaching"></div>
     <script src="involute_aproaching.js"></script>
 
-    <h4>An equivalent definition of a self-approaching path is that for every point on the path there has to be a 90° angle containing the rest of the path.</h4>
+    <!--
+    <h4>An equivalent definition of a self-approaching path is that for every point on the path
+      there has to be a 90° angle containing the rest of the path.</h4>
     <p>or not...</p>
     <input type="range" min="0" max="100" value="100" class="slider" id="angleSlider">
     <div id="involute_degree"></div>
     <script src="involute_degree.js"></script>
+    -->
 
-    <h3>Second involute</h3>
+    <h3>Involute curves of kth order </h3>
+    <p>
+      As said before, an involute is a curve defined by another curve. This other curve can be a circle,
+      or an involute of a circle, which gives us an involute of an involute of a circle. An involute of second order.
+    </p>
+
+    <p>
+      The involute of first order is in purple, and the involute of second order
+      (involute of the involute of the circle) is in red
+    </p>
+
+    <div id="second_involute"></div>
     <script src="second_involute.js"></script>
+
+
+
+    <h3>Given two points inside a simple polygon, does there exist a self-approaching path inside it?</h3>
+
+    <div id="canvas"></div>
+
+    <script src="shortest_self_aproaching_path.js"></script>
+
+    <h3>Find the shortest self-approaching path.</h3>
+    <h3>Given a point s in a simple polygon P, what is the set of all points reach-able from s with self-approaching paths?</h3>
+    <h3>Given a point t, what is the set of all points from which t is reachable with a self-approaching path?</h3>
+    <h3>Given  a  polygonP,  test  if  it  is  self-approaching,  i.e.,  if  there  exists  aself-approaching path between any two points inP.</h3>
 
 
   </body>

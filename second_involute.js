@@ -6,9 +6,9 @@ var t = function( p ) {
     var second_involute;
 
     p.setup = function() {
-        p.createCanvas(800, 600);
+        p.createCanvas(700, 500);
         angle = 2*PI;
-        c = new CircleEq(30, createVector(600,250));
+        c = new CircleEq(30, createVector(550,190));
         involute = new InvoluteOfCircle(c, 0);
         second_involute = new SecondInvoluteOfCircle(c, 0);
         redraw();
@@ -19,8 +19,9 @@ var t = function( p ) {
         p.stroke('black');
         p.noFill();
         c.draw(p);
-        p.stroke('red');
+        p.stroke('purple');
         involute.draw(p, 0, angle, false);
+        p.stroke('red');
         second_involute.draw(p, 0, angle, false);
     }
 
