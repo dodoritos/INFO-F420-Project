@@ -15,6 +15,34 @@ var orangeLines = [];
 var isConvex = [];
 var path = [];
 
+class CyclicSpace{
+  constructor(bound1, bound2){
+    if (bound1 < bound2){
+      this.l = bound1;
+      this.h = bound2;
+    }
+    else{
+      this.l = bound2;
+      this.h = bound1;
+    }
+  }
+
+  doesContain(v){
+    return this.l < v && v < this.h;
+  }
+
+  isBetween(start, end, v, decrease = false){
+    let d = decrease ? -1 : 1;
+
+    if (start*d < end*d){
+      return start*d < v*d && v*d < end*d; // no loop case
+    }
+    else{
+      return start*d < v*d || v*d < end*d;
+    }
+  }
+}
+
 class PathPart{
   constructor(start, end, eq = null){
     this.start = start;
@@ -22,6 +50,14 @@ class PathPart{
     this.eq = eq;
     this.redZone = null;
     this.computeRedZone(start);
+  }
+  copy(){
+    return new PathPart(this.start, this.end, this.eq);
+  }
+  getCenter(){
+    if(this.eq == null) return null;
+    if(this.eq.getType() == "circle") return this.eq.range;
+    else return this.eq.circle.range;
   }
   computeRedZone(p){
     if(this.eq == null){ // line
@@ -44,6 +80,25 @@ class PathPart{
   isPointInRedZone(p){
     return this.redZone.isPointInside(p);
   }
+  getTangentFrom(p){
+    if (this.eq == null){
+      return [[this.start, p], [this.end, p]];
+    }
+    else{
+      let res = [];
+      let t = this.eq.get_tangent_from_point(p);
+      let c = this.getCenter();
+      spaceX = CyclicSpace(this.start.x, this.end.x);
+      spaceY = CyclicSpace(this.start.y, this.end.y);
+      for (const i in t){
+        if (spaceX.doesContain(t[i][0].x) || spaceY.doesContain(t[i][0].y)){
+          res.push(t[i]);
+        }
+      }
+      return res;
+    }
+  }
+
   draw(){
     if (this.eq == null){
       orangeLines.push([this.start, this.end]);
@@ -153,6 +208,79 @@ function shortestSelfApprochingPath(poly, geodesic, triangles=null){
 
 
   }
+}
+
+/**
+ *@param part A PathPart the tangents should touch
+ *@param ch The convex hull
+ *@return [[pointCW from CH, pointCW from part], [pointCCW from CH, pointCCW from part], partCW, partCCW]
+ *        partCCW is null if lineCCW[0] == lineCCW[1] and partCW is null if lineCW[0] == lineCW[1]
+ */
+function tangantToCHFrom(part, ch){
+  let endTan = [];
+  for (const i in ch){
+    if (ch[i].eq == null){// line
+      let intersectS = false;
+      let intersectE = false;
+      for (const j in ch){
+        if (ch[j].intesect(part.end, ch[i].start)) intersectS = true;
+        if (ch[j].intesect(part.end, ch[i].end)) intersectE = true;
+      }
+      if (!intersectS) endTan.push([ch[i].start, ch[i]]);
+      if (!intersectE) endTan.push([ch[i].end, ch[i]]);
+    }
+    else{
+      let tanI = ch[i].getTangentFrom(part.end);
+      for (const j in tanI){
+        endTan.push([tanI[j], ch[i]]);
+      }
+    }
+  }
+
+  //endTan should have size 2
+  let res = [null, null, null, null];
+
+  console.log("TODO check for the tangent between part and ch ");
+
+  return res;
+}
+
+function maintainCH(ch, newPart){
+  //CW  : from 0 to newPart.length
+  //CCW : from newPart.length to 0
+  newPart = newPart.copy();
+  let parts = tangantToCHFrom(newPart, ch, true);
+  let lineCW = parts[0];
+  let lineCCW = parts[1];
+  let partCW = parts[2];
+  let partCCW = parts[3];
+
+  //delete newly covered part
+  let i = ch.length - 1;
+  while (partCCW !== null && ch[i] !== partCCW){
+    i -= 1;
+  }
+  let j = 0;
+  while (partCW !== null && ch[j] !== partCW){
+    j += 1;
+  }
+  ch = ch.slice(j, i+1);
+
+  //close polygon with newPart
+  if (partCW !== null){
+    ch[0].start = lineCW[0];
+    ch = [new PathPart(lineCW[1], lineCW[0])].concat(ch);
+  }
+  if (partCCW !== null){
+    ch[ch.length - 1].end = lineCCW[0];
+    ch.push(new PathPart(lineCCW[0], lineCCW[1]));
+  }
+
+  newPart.start = lineCCW[1];
+  newPart.end = lineCW[1];
+  ch.push(newPart);
+
+  return ch;
 }
 
 

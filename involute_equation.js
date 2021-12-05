@@ -11,6 +11,19 @@ function angleBetween(l1, l2){
   return Math.atan2(l1.x * l2.y - l1.y * l2.x, l1.x * l2.x + l1.y * l2.y);
 }
 
+function computeEqSecondOrder(a, b, c){
+  let delta = b**2 - 4 * a * c;
+  if (delta < 0.0000000001 && delta > -0.0000000001){
+    delta = 0;
+  }
+  console.log(delta);
+  if (delta < 0)
+    return null;
+  let m1 = (- b + Math.sqrt(delta))/(2*a);
+  let m2 = (- b - Math.sqrt(delta))/(2*a);
+  return [m1, m2]
+}
+
 function smallestAngle(l1, l2){
   let res = angleBetween(l1, l2);
   if (res < 0)
@@ -52,6 +65,50 @@ class CircleEq {
 
     isPointInside(p){
       return distance(p, this.center) < this.range;
+    }
+
+    get_tangent_from_point(p){
+      // eq : y = mx + r * sqrt(1 + m**2)
+      //      y-mx = r sqrt(1 + m**2)
+      //      y**2 - 2ymx + m**2 * x**2 = r**2 (1 + m**2)
+      //      (x**2 - r**2)*m**2 - 2*y*x * m + y**2 - r**2 = 0
+      let r = this.range;
+      p = new Point(p.x - this.center.x, p.y - this.center.y);
+
+      let a = p.x**2 - r**2;
+      let b = -2 * p.y * p.x;
+      let c = p.y**2 - r**2;
+
+      let m = computeEqSecondOrder(a, b, c);
+
+      // y-p.y = m * (x-p.x)               y = m * (x-p.x) + p.y
+      // y**2 + x**2 = r**2                       (m * (x-p.x) + p.y)**2 + x**2 = r**2
+      //
+      // (m * (x-p.x) + p.y)**2 + x**2 = r**2
+      // (mx - m*p.x +p.y)**2 + x**2 = r**2     let d = -m*p.x +p.y
+      // (mx + d)**2 + x**2 = r**2
+      // m**2 * x**2 + 2mxd + d**2 + x**2 = r**2
+      // (m**2 + 1)* x**2 + 2mxd + d**2 - r**2 = 0
+
+      let d = -m[0] * p.x + p.y;
+      a = m[0]**2 + 1;
+      b = 2 * m[0] * d;
+      c = (d**2) - r**2;
+      console.log("abcd");
+      console.log(a);
+      console.log(b);
+      console.log(c);
+      console.log(d);
+      let x1 = computeEqSecondOrder(a, b, c)[0];
+      let y1 = m[0] * (x1 - p.x) + p.y;
+      d = -m[1] * p.x + p.y;
+      a = m[1]**2 + 1;
+      b = 2 * m[1] * d;
+      c = (d**2) - r**2;
+      let x2 = computeEqSecondOrder(a, b, c)[0];
+      let y2 = m[1] * (x2 - p.x) + p.y;
+
+      return [[new Point(x1, y1).add(this.center), p.add(this.center)], [new Point(x2, y2).add(this.center), p.add(this.center)]];
     }
 }
 
@@ -139,10 +196,6 @@ class SecondInvoluteOfCircle {
         return p5.Vector.fromAngle(angle + HALF_PI);
     }
 
-    get_tanent_to(p){
-      
-    }
-
     get_draw_points(start_rad, end_rad){
       let res = [];
       if (end_rad < start_rad)
@@ -151,7 +204,6 @@ class SecondInvoluteOfCircle {
       for (let o = start_rad; o <= end_rad; o += PI/40) {
           let point = this.get_point(o).add(this.circle.center);
           res.push(point);
-          console.log(this.get_tangent_vector(o));
       }
 
       let point = this.get_point(end_rad).add(this.circle.center);
