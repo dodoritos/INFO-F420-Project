@@ -7,6 +7,19 @@ function lineAngle(p1, p2){
   return Math.atan2((p2.y - p1.y), (p2.x - p1.x));
 }
 
+function angleBetween(l1, l2){
+  return Math.atan2(l1.x * l2.y - l1.y * l2.x, l1.x * l2.x + l1.y * l2.y);
+}
+
+function smallestAngle(l1, l2){
+  let res = angleBetween(l1, l2);
+  if (res < 0)
+    res = -res;
+  return res;
+}
+
+
+
 class CircleEq {
     /**
      * @param {number} range
@@ -126,16 +139,34 @@ class SecondInvoluteOfCircle {
         return p5.Vector.fromAngle(angle + HALF_PI);
     }
 
+    get_tanent_to(p){
+      
+    }
+
+    get_draw_points(start_rad, end_rad){
+      let res = [];
+      if (end_rad < start_rad)
+          [end_rad, start_rad] = [start_rad, end_rad];
+
+      for (let o = start_rad; o <= end_rad; o += PI/40) {
+          let point = this.get_point(o).add(this.circle.center);
+          res.push(point);
+          console.log(this.get_tangent_vector(o));
+      }
+
+      let point = this.get_point(end_rad).add(this.circle.center);
+      res.push(point);
+
+      return res;
+    }
+
     draw(canvas, start_rad, end_rad, display_lines) {
-        if (end_rad < start_rad)
-            [end_rad, start_rad] = [start_rad, end_rad];
+        let toDraw = this.get_draw_points(start_rad, end_rad);
         canvas.beginShape();
-        for (let o = start_rad; o <= end_rad; o += PI/40) {
-            let point = this.get_point(o).add(this.circle.center);
+        for (const i in toDraw) {
+            let point = toDraw[i];
             canvas.vertex(point.x, point.y);
         }
-        let point = this.get_point(end_rad).add(this.circle.center);
-        canvas.vertex(point.x, point.y);
         canvas.endShape();
         if (display_lines) {
             canvas.stroke('black');
