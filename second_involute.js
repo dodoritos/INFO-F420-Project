@@ -20,10 +20,11 @@ var t = function( p ) {
     }
 
     p.setup = function() {
-        p.createCanvas(700, 500);
+        p.createCanvas(500, 500);
         draw_angle = 2*PI;
-        c = new CircleEq(20, createVector(550,190));
-        first_start_angle = HALF_PI/2;
+        c = new CircleEq(20, createVector(300,190));
+        first_start_angle = 2*PI*firstDegreeOfStart.value/firstDegreeOfStart.max;
+        second_start_angle = 2*PI*secondDegreeOfStart.value/secondDegreeOfStart.max;
         // start_angle = 0;
         redraw();
     };
