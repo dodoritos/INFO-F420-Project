@@ -82,20 +82,13 @@ class PathPart{
   }
   getTangentFrom(p){
     if (this.eq == null){
-      return [[this.start, p], [this.end, p]];
+      return null;
     }
     else{
-      let res = [];
-      let t = this.eq.get_tangent_from_point(p);
       let c = this.getCenter();
-      spaceX = CyclicSpace(this.start.x, this.end.x);
-      spaceY = CyclicSpace(this.start.y, this.end.y);
-      for (const i in t){
-        if (spaceX.doesContain(t[i][0].x) || spaceY.doesContain(t[i][0].y)){
-          res.push(t[i]);
-        }
-      }
-      return res;
+      let t = this.eq.get_tangent_from_point(p, lineAngle(this.start, c), lineAngle(this.end, c));
+      if (t == null) return null;
+      return [this.eq.get_point(t), p];
     }
   }
 
@@ -210,13 +203,55 @@ function shortestSelfApprochingPath(poly, geodesic, triangles=null){
   }
 }
 
+function intersectCH(p1, p2, ch){
+  for (const i in ch){
+    if (ch[i].intesect(p1, p2)) return true;
+  }
+  return false;
+}
+
 /**
+ * high possibility of bug
  *@param part A PathPart the tangents should touch
  *@param ch The convex hull
  *@return [[pointCW from CH, pointCW from part], [pointCCW from CH, pointCCW from part], partCW, partCCW]
  *        partCCW is null if lineCCW[0] == lineCCW[1] and partCW is null if lineCW[0] == lineCW[1]
  */
 function tangantToCHFrom(part, ch){
+  let res = [null, null, null, null];
+  let i = 0;
+  let cwNotFound = true;
+  let pPart;
+  while (i < ch.length && cwNotFound){
+    pPart = part.getTangentFrom(ch[i].end);
+    if (pPart == null){
+      pPart = part.end;
+    }
+    cwNotFound = !intersectCH(pPart, ch[i].end, ch);
+    i += 1;
+  }
+
+  res[0] = [ch[i-1].end, pPart];
+  res[2] = ch[i-1];
+
+
+  let cwwNotFound = true;
+  while (i < ch.length && cwwNotFound){
+    pPart = part.getTangentFrom(ch[i].end);
+    if (pPart == null){
+      pPart = part.end;
+    }
+    cwwNotFound = intersectCH(pPart, ch[i].end, ch);
+    i += 1;
+  }
+
+  res[1] = [ch[i-1].end, pPart];
+  if (ch[i-1].end == part.start) res[3] = ch[i-1];
+
+  return res;
+}
+
+/*function tangantToCHFrom(part, ch){
   let endTan = [];
   for (const i in ch){
     if (ch[i].eq == null){// line
@@ -238,12 +273,44 @@ function tangantToCHFrom(part, ch){
   }
 
   //endTan should have size 2
-  let res = [null, null, null, null];
+  if (part.eq == null){
+    for (const i in ch){
+      if (ch[i].eq == null){// line
+        let ts = part.getTangentFrom(ch[i].start);
+        let te = part.getTangentFrom(ch[i].end);
+        let intersectS = ts.length == 0;
+        let intersectE = te.length == 0;
+        for (const j in ch){
+          if ((!intersectS) && ch[j].intesect(ts[0][0], ch[i].start)) intersectS = true;
+          if ((!intersectE) && ch[j].intesect(te[0][0], ch[i].end)) intersectE = true;
+        }
+        if (!intersectS) endTan.push([ch[i].start, ch[i]]);
+        if (!intersectE) endTan.push([ch[i].end, ch[i]]);
+      }
+      else{
+        let tanI = part.commonTangent(ch[i]);
+        for (const j in tanI){
+          endTan.push([tanI[j], ch[i]]);
+        }
+      }
+    }
+  }
+  //endTan should have size 3 or 2
 
-  console.log("TODO check for the tangent between part and ch ");
+  let res = [null, null, null, null];
+  if (endTan.length == 2){
+    res[0] = endTan[0][0];
+    res[2] = endTan[0][1];
+  }
+  else if (endTan.length == 3) {
+    res[0] = endTan[2][0];
+    res[0] = endTan[2][1];
+  }
+  res[1] = endTan[1][0];
+  res[3] = endTan[1][1];
 
   return res;
-}
+}*/
 
 function maintainCH(ch, newPart){
   //CW  : from 0 to newPart.length
