@@ -7,6 +7,12 @@ function lineAngle(p1, p2){
   return Math.atan2((p2.y - p1.y), (p2.x - p1.x));
 }
 
+function angleBetweenTreeVectors(a, b, c) {
+    var x = a.copy().sub(b);
+    var y = c.copy().sub(b);
+    return x.angleBetween(y);
+}
+
 function angleBetween(l1, l2){
   return Math.atan2(l1.x * l2.y - l1.y * l2.x, l1.x * l2.x + l1.y * l2.y);
 }
@@ -140,6 +146,34 @@ class InvoluteOfCircle {
         return p5.Vector.fromAngle(angle + HALF_PI);
     }
 
+    /**
+     * Take any point in space and return the angle of the tangent point on the involute between two angles
+     * /!\ It's important to search in a tiny area
+     */
+    get_tangent_of_point(p, start, end) {
+
+        var angle = (end+start)/2;
+
+        var point_on_involute = this.get_point(angle);
+        var point_on_circle = this.circle.get_point(angle);
+        var tangent_angle = Math.abs(angleBetweenTreeVectors(p, point_on_involute, point_on_circle));
+
+        const delta = 0.0000001; // Precision of the search
+        while (Math.abs(tangent_angle - HALF_PI) > delta) {
+            if (tangent_angle < HALF_PI) {
+                end = angle;
+            } else {
+                start = angle;
+            }
+            angle = (end+start)/2;
+
+            var point_on_involute = this.get_point(angle);
+            var point_on_circle = this.circle.get_point(angle);
+            tangent_angle = Math.abs(angleBetweenTreeVectors(p, point_on_involute, point_on_circle));
+        }
+        return angle;
+    }
+
     draw(canvas, start_rad, end_rad, display_lines) {
         if (end_rad < start_rad)
             [end_rad, start_rad] = [start_rad, end_rad];
@@ -194,6 +228,34 @@ class SecondInvoluteOfCircle {
 
     get_tangent_vector(angle) {
         return p5.Vector.fromAngle(angle + HALF_PI);
+    }
+
+    /**
+     * Take any point in space and return the angle of the tangent point on the involute between two angles
+     * /!\ It's important to search in a tiny area
+     */
+    get_tangent_of_point(p, start, end) {
+
+        var angle = (end+start)/2;
+
+        var point_on_involute = this.get_point(angle);
+        var point_on_circle = this.circle.get_point(angle);
+        var tangent_angle = Math.abs(angleBetweenTreeVectors(p, point_on_involute, point_on_circle));
+
+        const delta = 0.0000001; // Precision of the search
+        while (Math.abs(tangent_angle - HALF_PI) > delta) {
+            if (tangent_angle < HALF_PI) {
+                end = angle;
+            } else {
+                start = angle;
+            }
+            angle = (end+start)/2;
+
+            var point_on_involute = this.get_point(angle);
+            var point_on_circle = this.circle.get_point(angle);
+            tangent_angle = Math.abs(angleBetweenTreeVectors(p, point_on_involute, point_on_circle));
+        }
+        return angle;
     }
 
     get_draw_points(start_rad, end_rad){
