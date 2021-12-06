@@ -159,7 +159,7 @@ class InvoluteOfCircle {
         var tangent_angle = Math.abs(angleBetweenTreeVectors(p, point_on_involute, point_on_circle));
 
         const delta = 0.0000001; // Precision of the search
-        while (Math.abs(tangent_angle - HALF_PI) > delta) {
+        while (Math.abs(tangent_angle - HALF_PI) > delta && Math.abs(start-end) > delta) {
             if (tangent_angle < HALF_PI) {
                 end = angle;
             } else {
@@ -171,7 +171,11 @@ class InvoluteOfCircle {
             var point_on_circle = this.circle.get_point(angle);
             tangent_angle = Math.abs(angleBetweenTreeVectors(p, point_on_involute, point_on_circle));
         }
-        return angle;
+        if (Math.abs(tangent_angle - HALF_PI) <= 2*delta) {
+            return angle;
+        } else {
+            return null;
+        }
     }
 
     draw(canvas, start_rad, end_rad, display_lines) {
@@ -243,7 +247,7 @@ class SecondInvoluteOfCircle {
         var tangent_angle = Math.abs(angleBetweenTreeVectors(p, point_on_involute, point_on_circle));
 
         const delta = 0.0000001; // Precision of the search
-        while (Math.abs(tangent_angle - HALF_PI) > delta) {
+        while (Math.abs(tangent_angle - HALF_PI) > delta && Math.abs(start-end) > delta) {
             if (tangent_angle < HALF_PI) {
                 end = angle;
             } else {
@@ -255,7 +259,11 @@ class SecondInvoluteOfCircle {
             var point_on_circle = this.circle.get_point(angle);
             tangent_angle = Math.abs(angleBetweenTreeVectors(p, point_on_involute, point_on_circle));
         }
-        return angle;
+        if (Math.abs(tangent_angle - HALF_PI) <= 2*delta) {
+            return angle;
+        } else {
+            return null;
+        }
     }
 
     get_draw_points(start_rad, end_rad){

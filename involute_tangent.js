@@ -28,9 +28,11 @@ var t = function( p ) {
         // var point = createVector(250, 300);
         p.point(point.x, point.y);
         point.sub(c.center);
-        var a = involute.get_tangent_of_point(point, 0, TWO_PI+1);
-        var t = involute.get_point(a);
-        p.point(t.add(c.center));
+        var a = involute.get_tangent_of_point(point, 0, PI);
+        if (a != null) {
+            var t = involute.get_point(a);
+            p.point(t.add(c.center));
+        }
         p.strokeWeight(1); // Make the points 10 pixels in size
     }
 
