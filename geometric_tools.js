@@ -5,6 +5,10 @@ class Point {
         this.y = y;
     }
 
+    add(p){
+      return new Point(this.x + p.x, this.y + p.y);
+    }
+
     toString(){
       return "(" + this.x + "," + this.y + ")";
     }
@@ -16,6 +20,10 @@ class Point {
  */
 function distance(a, b){
     return sqrt((a.x-b.x)**2 + (a.y-b.y)**2);
+}
+
+function toVector(p1, p2){
+  return new Point(p2.x - p1.x, p2.y - p1.y);
 }
 
 function computeIntersection(a, b, c, d){
