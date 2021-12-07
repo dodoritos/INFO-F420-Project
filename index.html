@@ -116,11 +116,11 @@
     <h2>Self-approaching path</h2>
     <h3>Initialisation</h3>
     <p>
-      To construct the shortest self-approaching path in a simple polygone from a point s to a point t, we first need to construct the geodesic between s and t and to split the polygone into 2 chains, the left one and the right one.
+      To construct the shortest self-approaching path in a simple polygone from a point <em>s</em> to a point <em>t</em>, we first need to construct the geodesic between <em>s</em> and <em>t</em> and to split the polygone into 2 chains, the left one and the right one.
       <!--Possible description of how geodesic-->
     </p>
     <p>
-      In order to split the polygone, we need to cut it at two points. Those point will be the intersections between the polygone and the 2 half-line we get by prolonging the two extremitys of the geodesic beyond s and t.
+      In order to split the polygone, we need to cut it at two points. Those point will be the intersections between the polygone and the 2 half-line we get by prolonging the two extremitys of the geodesic beyond <em>s</em> and <em>t</em>.
     </p>
     <p>
       We will construct the shortest self-aproaching path from the end, by following the geodesic.
@@ -130,22 +130,37 @@
     </p>
     <h3>Main loop</h3>
     <p>
-      We repeat the followings until we reach S or that we find that there are no self approching path between s and t.
+      We repeat the followings until we reach <em>s</em> or that we find that there are no self approching path between <em>s</em> and <em>t</em>.
     </p>
     <p>
       First we compute the CH convex hull of the part already constructed of the self-approaching path.
     </p>
     <p>
-      Then let p be the last point added to the self-approaching path and let q be the point comming after p in the geodesic.<br>
-      We compute tp, the tangent of CH at point p (Since 2 tangents are possible, the one chosen will depend of which chain p belong to).<br>
+      Then let <em>p</em> be the last point added to the self-approaching path and let <em>q</em> be the vertex comming after <em>p</em> in the geodesic.<br>
+      We compute <em>tp</em>, the tangent of [<em>CH</em>] at point <em>p</em> (Since 2 tangents are possible, the one chosen will depend of which chain <em>p</em> belong to).<br>
     </p>
     From here, we have 2 cases:
-    <h4>case 1: The angle between tp and [pq] is no less than 90°</h4>
+    <h4>case 1: The angle between tp and [<em>pq</em>] is no less than 90°</h4>
     <p>
-      In this case, we just have to add the line segment [pq] to the self-approaching path since at each point of [pq] it is possible to "see" all of CH at once with a field of view of 90°.
+      In this case, we just have to add the line segment [<em>pq</em>] to the self-approaching path since at each point of [<em>pq</em>] it is possible to "see" all of [<em>CH</em>] at once with a field of view of 90°.
     </p>
-    <h4>case 2: The angle between tp and [pq] is less than 90°</h4>
-
+    <h4>case 2: The angle between <em>tp</em> and [<em>pq</em>] is less than 90°</h4>
+    <p>
+      In this case let <em>i</em> be the next vertex of the geodesic that is not under the involute <em>Ich</em> around [<em>CH</em>] starting at <em>p</em> (in the clockwise or conterclockwise direction depending of which chain <em>p</em> belong to)
+      and let <em>e</em> be the intersection between the tangent of <em>Ich</em> at point <em>p</em> and the chain <em>p</em> does not belong to.<br>
+      If no such point exist, the <em>s</em> is under <em>Ich</em> and there is therefor no self-approching path between <em>s</em> and <em>t</em> in the polygone.
+    </p>
+    <p>
+      Compute the geodesic between <em>e</em> and <em>s</em> and let <em>j</em> be the first common vertex between the geodesic of <em>p</em> to <em>s</em> and the geodesic from <em>e</em> to <em>s</em>.<br>
+      Let <em>EJ</em> be the geodesic from <em>e</em> to <em>j</em> and let <em>PJ</em> be the geodesic from <em>p</em> to <em>j</em>.<br>
+      If <em>Ich</em> intersect <em>EJ</em>, then there is no self-approching path from <em>s</em> to <em>t</em> since all path from <em>p</em> to <em>j</em> in the polygon intersect <em>Ich</em>.
+    </p>
+    <p>
+      Let <em>a</em> be the point from <em>Ich</em>, that belong either to the common tangent between <em>Ich</em> and <em>EJ</em>
+      or the common tangent between <em>Ich</em> and <em>PJ</em>, that is the closest from <em>p</em>.<br>
+      Let <em>b</em> be the point of <em>EJ</em> or <em>PJ</em> such that [<em>ab</em>] is a segment of the common tangent between <em>Ich</em> and <em>EJ</em> or <em>PJ</em>.
+      We now add to the self-approching path the segment from <em>p</em> to <em>a</em> of <em>Ich</em>, then we add the segment [<em>ab</em>], and finally we add the geodesic between <em>b</em> and <em>j</em>.
+    </p>
 
     <p> <a href="https://github.com/dodoritos/INFO-F420-Project.git"> Source code </a> </p>
     <h2>Bibliography</h2>
