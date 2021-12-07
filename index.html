@@ -81,15 +81,6 @@
     <div id="carpet"></div>
     <script src="carpet.js"></script>
 
-    <p>
-      Here 3 involutes...
-    </p>
-    <input type="range" min="-100" max="100" value="20" class="slider" id="inv1DegreeOfStart">
-    <input type="range" min="-100" max="100" value="20" class="slider" id="inv2DegreeOfStart">
-    <input type="range" min="-100" max="100" value="20" class="slider" id="inv3DegreeOfStart">
-    <div id="three_involutes"></div>
-    <script src="three_involutes.js"></script>
-
 
     <p>
       Tangent of involute.
@@ -167,12 +158,15 @@
       Let <em>b</em> be the point of <em>EJ</em> or <em>PJ</em> such that [<em>ab</em>] is a segment of the common tangent between <em>Ich</em> and <em>EJ</em> or <em>PJ</em>.
       We now add to the self-approching path the segment from <em>p</em> to <em>a</em> of <em>Ich</em>, then we add the segment [<em>ab</em>], and finally we add the geodesic between <em>b</em> and <em>j</em>.
     </p>
-
+    <h3>Exemple</h3>
     <p>
       Here is an example of a piece of a path where an involute in purple is drawn from an arc in red
     </p>
     <div id="path_example_canvas"></div>
     <script src="path_example.js"></script>
+    <p>
+      We ended up not implementing the algorithm because we had trouble with the computation of the involute of order bigger than 2, with the computation of the common tangent between 2 involutes and more generally a lack of time to implement everything needed for the algoritm to work.
+    </p>
 
 
 
