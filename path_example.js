@@ -36,7 +36,7 @@ var t = function( p ) {
 
         let circle = new CircleEq(radius/2, t);
         //let circle = new CircleEq(radius/5, t);
-        circle.draw(p, 0, TWO_PI)
+        //circle.draw(p, 0, TWO_PI)
         const lenght_of_the_line = tmp2.mag();
         const lenght_of_the_arc = radius*HALF_PI/3;
         // const degree_of_start = tmp.heading()+lenght_of_the_arc;
@@ -50,7 +50,9 @@ var t = function( p ) {
         console.log(lenght_of_the_line)
         console.log(lenght_of_the_arc)
         //inv.draw(p,radians(lenght_of_the_line), radians(lenght_of_the_line+lenght_of_the_arc), false);
-        inv.draw(p,degree_of_draw_start, degree_of_draw_end, false);
+
+        p.stroke('purple');
+        inv.draw(p,degree_of_draw_start, degree_of_draw_end, true);
     }
 
     p.setup = function() {
