@@ -130,11 +130,22 @@
     </p>
     <h3>Main loop</h3>
     <p>
-      We will loop until we reach S or that we find that there are no self approching path between s and t.
+      We repeat the followings until we reach S or that we find that there are no self approching path between s and t.
     </p>
     <p>
-      
+      First we compute the CH convex hull of the part already constructed of the self-approaching path.
     </p>
+    <p>
+      Then let p be the last point added to the self-approaching path and let q be the point comming after p in the geodesic.<br>
+      We compute tp, the tangent of CH at point p (Since 2 tangents are possible, the one chosen will depend of which chain p belong to).<br>
+    </p>
+    From here, we have 2 cases:
+    <h4>case 1: The angle between tp and [pq] is no less than 90°</h4>
+    <p>
+      In this case, we just have to add the line segment [pq] to the self-approaching path since at each point of [pq] it is possible to "see" all of CH at once with a field of view of 90°.
+    </p>
+    <h4>case 2: The angle between tp and [pq] is less than 90°</h4>
+
 
     <p> <a href="https://github.com/dodoritos/INFO-F420-Project.git"> Source code </a> </p>
     <h2>Bibliography</h2>
