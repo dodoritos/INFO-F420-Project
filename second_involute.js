@@ -44,7 +44,7 @@ var t = function( p ) {
         second_involute.draw(p, first_start_angle, draw_angle, false);
         // debug
         p.stroke('blue');
-        let tg = c.get_tangent_from_point(testP);
+        let tg = c.get_tangent_of_point(testP);
         console.log(tg);
         p.line(tg[0][0].x, tg[0][0].y, tg[0][1].x, tg[0][1].y);
         p.line(tg[1][0].x, tg[1][0].y, tg[1][1].x, tg[1][1].y);

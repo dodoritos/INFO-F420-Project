@@ -225,13 +225,13 @@ function isVisibleFrom(poly ,s, t){
   return true;
 }
 
-function findStart(triangles, s, t){
+function findStart(triangles, s, t = null){
   let res = [null, null];
   for (const i in triangles["all"]){
     if (triangles["all"][i].isPointInside(s)){
       res[0] = triangles["all"][i];
     }
-    if (triangles["all"][i].isPointInside(t)){
+    if (t !== null && triangles["all"][i].isPointInside(t)){
       res[1] = triangles["all"][i];
     }
   }
@@ -271,6 +271,25 @@ function joinPath(path1, path2){
   let t = path2[path2.length - 1];
   let prevS = path1[path1.length - 2];
   return [s].concat(path2.slice(path2.indexOf(prevS), path2.length));
+}
+
+function commonPathAncestor(poly, triangles, p1, p2, s){
+  let path1 = shortestPathTree(poly, traingles, p1, s).pathToRoot();
+  let path2 = shortestPathTree(poly, traingles, p2, s).pathToRoot();
+  let common = commonAncester(path1, path2);
+  path1.push(common);
+  path2.push(common);
+  return [common, path1, path2];
+}
+
+// !! change path1 and path2 !!
+function commonAncester(path1, path2){
+  let res = null;
+  while(path1[path1.length - 1] == path2[path2.length - 1]){
+    res = path1.pop();
+    path2.pop();
+  }
+  return res;
 }
 
 function shortestPathToTriangle(poly, triangles, triangle, p){
