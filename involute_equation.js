@@ -73,7 +73,7 @@ class CircleEq {
       return distance(p, this.center) < this.range;
     }
 
-    get_tangent_from_point(p){
+    get_tangent_of_point(p){
       // eq : y = mx + r * sqrt(1 + m**2)
       //      y-mx = r sqrt(1 + m**2)
       //      y**2 - 2ymx + m**2 * x**2 = r**2 (1 + m**2)
