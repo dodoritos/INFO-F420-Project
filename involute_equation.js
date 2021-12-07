@@ -28,8 +28,8 @@ function lineAngle(p1, p2){
 
 function positiveLineAngle(p1, p2){
   res = lineAngle(p1, p2);
-  if (res < 0) res += TWO_PI;
-  return res;
+  //if (res < 0) res += TWO_PI;
+  return res+PI;
 }
 
 function angleBetweenTreeVectors(a, b, c) {
@@ -78,12 +78,14 @@ class CircleEq {
       return "circle";
     }
 
-    draw(canvas) {
+    draw(canvas, start_rad = 0, end_rad = TWO_PI) {
         canvas.beginShape();
-        for (let o = 0; o <= TWO_PI; o += TWO_PI/40) {
+        for (let o = start_rad; o <= end_rad; o += TWO_PI/40) {
             let point_on_canvas = this.get_point(o).add(this.center);
             canvas.vertex(point_on_canvas.x, point_on_canvas.y);
         }
+        let point_on_canvas = this.get_point(end_rad).add(this.center);
+        canvas.vertex(point_on_canvas.x, point_on_canvas.y);
         canvas.endShape();
     }
 

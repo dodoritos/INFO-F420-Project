@@ -64,7 +64,7 @@ class PathPart{
       this.redZone = new CircleEq(distance(this.start, p), createVector(this.start.x, this.start.y));
     }
     else if(this.eq.getType() == "circle"){
-      this.eq.range = distance(this.start, p);
+      //this.eq.range = distance(this.start, p);
       this.redZone = new InvoluteOfCircle(this.eq, positiveLineAngle(this.start, this.eq.center));
     }
     else if(this.eq.getType() == "Involute1"){
@@ -98,7 +98,7 @@ class PathPart{
       orangeLines.push([this.start, this.end]);
     }
     else if(this.eq.getType() == "circle"){
-      this.eq.draw(can, lineAngle(this.start, this.eq.center), lineAngle(this.end, this.eq.center), false);
+      this.eq.draw(can, positiveLineAngle(this.start, this.eq.center), positiveLineAngle(this.end, this.eq.center), false);
     }
     else{
       console.log("start");
@@ -214,7 +214,7 @@ function shortestSelfApprochingPath(poly, geodesic, triangles=null){
       let chainPl = buf[1];
       let chainPr = buf[2];
 
-      // TODO compute CH 'til p'
+      // TODO compute Ich 'til p'
 
     }
 
@@ -682,13 +682,17 @@ function draw() {
       drawPoint(pointsInside[1]);
       //drawLine(pointsInside[0], pointsInside[1]);
     }
-    if (pointsInside.length > 2) {
-      drawPoint(pointsInside[2]);
+    let i = 2;
+    while (i < pointsInside.length) {
+      drawPoint(pointsInside[i]);
+      i+=1;
     }
   }
   if (path.length > 0){
     stroke("green");
-    path[0].draw(this);
+    for (const i in path){
+      path[i].draw(this);
+    }
   }
 }
 
@@ -699,22 +703,17 @@ function addPoint() {
   if (isPolygonClosed) {
     if (isPointInPolygone(newPoint, points)){
       pointsInside.push(newPoint);
-      if (pointsInside.length > 3){
-        console.log(distance(pointsInside[0], pointsInside[1]));
-        let circleEQ = new CircleEq(distance(pointsInside[0], pointsInside[1]), toP5Vector(pointsInside[0]));
-        let invEQ = new InvoluteOfCircle(circleEQ, positiveLineAngle(pointsInside[0], pointsInside[1]));
-        let inv = new PathPart(invEQ.get_point(positiveLineAngle(pointsInside[1], pointsInside[2])), invEQ.get_point(positiveLineAngle(pointsInside[2], pointsInside[3])), invEQ);
-        path.push(inv);
-        console.log(inv);
-        //geoPath = geodesicPath(points, pointsInside[0], pointsInside[1]);
+      if (pointsInside.length > 1){
+
+        geoPath = geodesicPath(points, pointsInside[0], pointsInside[1]);
         //shortestSelfApprochingPath(points, geoPath);
 
-      // for (const i in geoPath){
-        //  let j = parseInt(i);
-          //if (j > 0){
-            //blueLines.push([geoPath[j-1], geoPath[j]]);
-          //}
-        //}
+       for (const i in geoPath){
+          let j = parseInt(i);
+          if (j > 0){
+            blueLines.push([geoPath[j-1], geoPath[j]]);
+          }
+        }
       }
     }
   } else {
