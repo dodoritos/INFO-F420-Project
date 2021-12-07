@@ -31,9 +31,9 @@
 
 
     <p>Start: <span id="startSpan"></span>&pi;</p>
-    <input type="range" min="0" max="100" value="10" class="slider" id="startSlider">
+    <input type="range" min="-50" max="50" value="10" class="slider" id="startSlider">
     <p>End: <span id="endSpan"></span>&pi;</p>
-    <input type="range" min="0" max="100" value="20" class="slider" id="endSlider">
+    <input type="range" min="-50" max="50" value="20" class="slider" id="endSlider">
     <p>Rotation: <span id="rotationSpan"></span>&pi;</p>
     <input type="range" min="0" max="100" value="20" class="slider" id="rotationSlider">
     <div id="involute_equation"></div>
@@ -42,7 +42,8 @@
     <p>An involute is self aproaching.
       Indeed, the distance between the center of the circle and a point 'a' on the circle itself is fixed
       and the ditance between the involute curve and the tengent point is self aproaching,
-      so the distance between the center and any point on the involute is always reducing.</p>
+      so the distance between the center and any point on the involute is always reducing.
+    </p>
 
 
     <p>Distance: <span id="distanceSpan"></span></p>
@@ -74,6 +75,11 @@
     <input type="range" min="-100" max="100" value="20" class="slider" id="secondDegreeOfStart">
     <div id="second_involute"></div>
     <script src="second_involute.js"></script>
+
+
+    <h4>Intresting thing</h4>
+    <div id="carpet"></div>
+    <script src="carpet.js"></script>
 
     <p>
       Here 3 involutes...
@@ -162,11 +168,19 @@
       We now add to the self-approching path the segment from <em>p</em> to <em>a</em> of <em>Ich</em>, then we add the segment [<em>ab</em>], and finally we add the geodesic between <em>b</em> and <em>j</em>.
     </p>
 
+    <p>
+      Here is an example of a piece of a path where an involute in purple is drawn from an arc in red
+    </p>
+    <div id="path_example_canvas"></div>
+    <script src="path_example.js"></script>
+
+
+
     <p> <a href="https://github.com/dodoritos/INFO-F420-Project.git"> Source code </a> </p>
     <h2>Bibliography</h2>
     <ol>
       <li>
-        <p>Prosenjit Bose, Irina Kostitsyna, and Stefan Langerman  <a href="https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&cad=rja&uact=8&ved=2ahUKEwjR-oqun8P0AhXHh_0HHbtSCVMQFnoECAIQAQ&url=https%3A%2F%2Fdrops.dagstuhl.de%2Fopus%2Fvolltexte%2F2017%2F7216%2Fpdf%2FLIPIcs-SoCG-2017-21.pdf&usg=AOvVaw3FBZi_a7LvfAcDYJ17v8Q9"> <cite>Self-approaching paths in simple polygon</cite> </a>(2017-06) </p>
+        <p>Prosenjit Bose, Irina Kostitsyna, and Stefan Langerman  <a href="https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&cad=rja&uact=8&ved=2ahUKEwjR-oqun8P0AhXHh_0HHbtSCVMQFnoECAIQAQ&url=https%3A%2F%2Fdrops.dagstuhl.de%2Fopus%2Fvolltexte%2F2017%2F7216%2Fpdf%2FLIPIcs-SoCG-2017-21.pdf&usg=AOvVaw3FBZi_a7LvfAcDYJ17v8Q9"> <cite>Self-approaching paths in simple polygon</cite> </a>(2017-06) <a href="https://arxiv.org/pdf/1703.06107.pdf"> (Long version) </a></p>
       </li>
     </ol>
 
