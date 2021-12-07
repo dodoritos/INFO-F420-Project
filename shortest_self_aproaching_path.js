@@ -4,7 +4,7 @@ const CANVA_X_RIGHT = 600;
 const CANVA_Y_UP = 100;
 const CANVA_Y_DOWN = 500;
 
-var canvas;
+//var canvas;
 
 var points = [];
 var pointsInside = [];
@@ -56,20 +56,20 @@ class PathPart{
   }
   getCenter(){
     if(this.eq == null) return null;
-    if(this.eq.getType() == "circle") return this.eq.range;
-    else return this.eq.circle.range;
+    if(this.eq.getType() == "circle") return this.eq.center;
+    else return this.eq.circle.center;
   }
   computeRedZone(p){
     if(this.eq == null){ // line
       this.redZone = new CircleEq(distance(this.start, p), createVector(this.start.x, this.start.y));
     }
     else if(this.eq.getType() == "circle"){
-      this.eq.range = distance(this.start, p);
-      this.redZone = new InvoluteOfCircle(this.eq, lineAngle(start, this.eq.center));
+      //this.eq.range = distance(this.start, p);
+      this.redZone = new InvoluteOfCircle(this.eq, positiveLineAngle(this.start, this.eq.center));
     }
     else if(this.eq.getType() == "Involute1"){
-      this.eq.circle.range = distance(this.start, p);
-      this.redZone = new InvoluteOfCircle(this.eq.circle, lineAngle(start, this.eq.circle.center));
+      //this.eq.circle.range = distance(this.start, p);
+      this.redZone = new InvoluteOfCircle(this.eq.circle, positiveLineAngle(this.start, this.eq.circle.center));
     }
     else if(this.eq.getType() == "Involute2"){
       //should be done for Involute k and do k+1;
@@ -92,15 +92,20 @@ class PathPart{
     }
   }
 
-  draw(){
+  draw(can){
+    can.noFill();
     if (this.eq == null){
       orangeLines.push([this.start, this.end]);
     }
     else if(this.eq.getType() == "circle"){
-      this.eq.draw(canvas, lineAngle(this.start, this.eq.center), lineAngle(this.end, this.eq.center), false);
+      this.eq.draw(can, positiveLineAngle(this.start, this.eq.center), positiveLineAngle(this.end, this.eq.center), false);
     }
     else{
-      this.eq.draw(canvas, lineAngle(this.start, this.eq.circle.center), lineAngle(this.end, this.eq.circle.center), false);
+      console.log("start");
+      console.log(positiveLineAngle(this.start, this.getCenter())-this.eq.degree_of_start);
+      console.log(positiveLineAngle(this.end, this.getCenter())-this.eq.degree_of_start);
+      this.eq.draw(can, positiveLineAngle(this.start, this.getCenter()) - this.eq.degree_of_start, positiveLineAngle(this.end, this.getCenter()) - this.eq.degree_of_start, false);
+      //this.eq.draw(can, lineAngle(this.start, this.eq.circle.center), lineAngle(this.end, this.eq.circle.center), false);
     }
   }
 }
@@ -168,35 +173,49 @@ function shortestSelfApprochingPath(poly, geodesic, triangles=null){
   let lrChains = chains(geodesic, poly);
   let lChain = lrChains[0];
   let rChain = lrChains[1];
-  let current = geodesic.pop();
-  let next = geodesic.pop();
-  let isLChain = lChain.indexOf(current) !== -1;
-  path.push(new PathPart(current, next));
+  let pl = geodesic.pop();
+  let pi = geodesic.pop();
+  let isLChain = lChain.indexOf(pl) !== -1;
+  let ch = [];
+  let s = geodesic[0];
+  path.push(new PathPart(pl, pi));
+  maintainCH(ch, path[0]);
 
   while (geodesic.length > 0){
-    current = next;
-    isLChain = lChain.indexOf(current) !== -1;
-    next = geodesic.pop();
-    let direct = true;
-    console.log(next);
-    while (isPointInsidePathCH(next, current)){
-      direct = false;
-      if (geodesic.length == 0){
-        console.log("no available path");
-        return null;
-      }
-      next = geodesic.pop();
-      console.log(next);
-    }
-
-    if (direct){
-      path.push(new PathPart(current, next));
+    pl = pi;
+    isLChain = lChain.indexOf(pl) !== -1;
+    let tanPlCH = tangentToCHFromPoint(pl, ch)[0];
+    pi = geodesic.pop();
+    if (angleBetweenTreeVectors(toP5Vector(tanPlCH[0]), toP5Vector(pl), toP5Vector(pi)) >= HALF_PI){
+      path.push(new PathPart(pl, pi));
+      maintainCH(ch, path[path.length - 1]);
     }
     else{
-      console.log("todo");
-    }
-    for (const i in path){
-      path[i].draw();
+      while (isPointInsidePathCH(pi, pl)){
+        if (geodesic.length == 0){
+          console.log("no available path");
+          return null;
+        }
+        next = geodesic.pop();
+      }
+      let lastPathPart = path[path.length - 1]
+      let tanPlIch = lastPathPart.redZone.get_tangent_vector(lineAngle(pl, lastPathPart.getCenter()));
+      let lineE = rayShoot(pl, pl.sub(tanPlIch), poly, true);
+
+      let pr = lineE[0];
+      if (isLChain){
+        if (rChain.indexOf(lineE[0]) > rChain.indexOf(lineE[1])) pr = lineE[1];
+      }
+      else{
+        if (lChain.indexOf(lineE[0]) > lChain.indexOf(lineE[1])) pr = lineE[1];
+      }
+      let buf = commonPathAncestor(poly, triangles, pl, pr, s);
+      let pj = buf[0];
+      let chainPl = buf[1];
+      let chainPr = buf[2];
+
+      // TODO compute Ich 'til p'
+
     }
 
 
@@ -210,6 +229,30 @@ function intersectCH(p1, p2, ch){
   return false;
 }
 
+function tangentToCHFromPoint(p, ch){
+  let res = [null, null, null, null];
+  let i = 0;
+  let cwNotFound = true;
+  while (i < ch.length && cwNotFound){
+    cwNotFound = !intersectCH(p, ch[i].end, ch);
+    i += 1;
+  }
+
+  res[0] = [ch[i-1].getTangentFrom(p)];
+  res[2] = ch[i-1];
+
+
+  let cwwNotFound = true;
+  while (i < ch.length && cwwNotFound){
+    cwwNotFound = intersectCH(p, ch[i].end, ch);
+    i += 1;
+  }
+  res[1] = [ch[i-1].getTangentFrom(p)];
+  if (ch[i-1].end !== part.start) res[3] = ch[i-1];
+
+  return res;
+}
+
 /**
  * high possibility of bug
  *@param part A PathPart the tangents should touch
@@ -217,7 +260,7 @@ function intersectCH(p1, p2, ch){
  *@return [[pointCW from CH, pointCW from part], [pointCCW from CH, pointCCW from part], partCW, partCCW]
  *        partCCW is null if lineCCW[0] == lineCCW[1] and partCW is null if lineCW[0] == lineCW[1]
  */
-function tangantToCHFrom(part, ch){
+function tangentToCHFromPart(part, ch){
   let res = [null, null, null, null];
   let i = 0;
   let cwNotFound = true;
@@ -231,7 +274,8 @@ function tangantToCHFrom(part, ch){
     i += 1;
   }
 
-  res[0] = [ch[i-1].end, pPart];
+  let commonTan = part.commonTangent(ch[i-1]);
+  res[0] = [commonTan];
   res[2] = ch[i-1];
 
 
@@ -244,14 +288,14 @@ function tangantToCHFrom(part, ch){
     cwwNotFound = intersectCH(pPart, ch[i].end, ch);
     i += 1;
   }
-
-  res[1] = [ch[i-1].end, pPart];
-  if (ch[i-1].end == part.start) res[3] = ch[i-1];
+  commonTan = part.commonTangent(ch[i-1]);
+  res[1] = [commonTan];
+  if (ch[i-1].end !== part.start) res[3] = ch[i-1];
 
   return res;
 }
 
-/*function tangantToCHFrom(part, ch){
+/*function tangentToCHFrom(part, ch){
   let endTan = [];
   for (const i in ch){
     if (ch[i].eq == null){// line
@@ -316,7 +360,9 @@ function maintainCH(ch, newPart){
   //CW  : from 0 to newPart.length
   //CCW : from newPart.length to 0
   newPart = newPart.copy();
-  let parts = tangantToCHFrom(newPart, ch, true);
+  if (ch.length == 0) return [newPart];
+
+  let parts = tangentToCHFromPart(newPart, ch, true);
   let lineCW = parts[0];
   let lineCCW = parts[1];
   let partCW = parts[2];
@@ -586,7 +632,7 @@ function setup() {
   buttonClose.parent("canvas");
   buttonClose.mousePressed(closePolygon);
   createP('').parent("canvas"); // new line
-  canvas = createCanvas(400, 400);
+  var canvas = createCanvas(400, 400);
   canvas.parent("canvas");
   canvas.mousePressed(addPoint);
 
@@ -636,6 +682,17 @@ function draw() {
       drawPoint(pointsInside[1]);
       //drawLine(pointsInside[0], pointsInside[1]);
     }
+    let i = 2;
+    while (i < pointsInside.length) {
+      drawPoint(pointsInside[i]);
+      i+=1;
+    }
+  }
+  if (path.length > 0){
+    stroke("green");
+    for (const i in path){
+      path[i].draw(this);
+    }
   }
 }
 
@@ -647,10 +704,11 @@ function addPoint() {
     if (isPointInPolygone(newPoint, points)){
       pointsInside.push(newPoint);
       if (pointsInside.length > 1){
+
         geoPath = geodesicPath(points, pointsInside[0], pointsInside[1]);
         //shortestSelfApprochingPath(points, geoPath);
 
-        for (const i in geoPath){
+       for (const i in geoPath){
           let j = parseInt(i);
           if (j > 0){
             blueLines.push([geoPath[j-1], geoPath[j]]);

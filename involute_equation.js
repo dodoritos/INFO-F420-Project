@@ -26,6 +26,12 @@ function lineAngle(p1, p2){
   return Math.atan2((p2.y - p1.y), (p2.x - p1.x));
 }
 
+function positiveLineAngle(p1, p2){
+  res = lineAngle(p1, p2);
+  //if (res < 0) res += TWO_PI;
+  return res+PI;
+}
+
 function angleBetweenTreeVectors(a, b, c) {
     var x = a.copy().sub(b);
     var y = c.copy().sub(b);
@@ -72,12 +78,14 @@ class CircleEq {
       return "circle";
     }
 
-    draw(canvas) {
+    draw(canvas, start_rad = 0, end_rad = TWO_PI) {
         canvas.beginShape();
-        for (let o = 0; o <= TWO_PI; o += TWO_PI/40) {
+        for (let o = start_rad; o <= end_rad; o += TWO_PI/40) {
             let point_on_canvas = this.get_point(o).add(this.center);
             canvas.vertex(point_on_canvas.x, point_on_canvas.y);
         }
+        let point_on_canvas = this.get_point(end_rad).add(this.center);
+        canvas.vertex(point_on_canvas.x, point_on_canvas.y);
         canvas.endShape();
     }
 
@@ -119,11 +127,6 @@ class CircleEq {
       a = m[0]**2 + 1;
       b = 2 * m[0] * d;
       c = (d**2) - r**2;
-      console.log("abcd");
-      console.log(a);
-      console.log(b);
-      console.log(c);
-      console.log(d);
       let x1 = computeEqSecondOrder(a, b, c)[0];
       let y1 = m[0] * (x1 - p.x) + p.y;
       d = -m[1] * p.x + p.y;
@@ -204,6 +207,7 @@ class InvoluteOfCircle {
         canvas.beginShape();
         for (let o = start_rad; o <= end_rad; o += PI/40) {
             let point = this.get_point(o).add(this.circle.center);
+            //console.log(point);
             canvas.vertex(point.x, point.y);
         }
 

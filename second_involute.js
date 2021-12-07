@@ -34,21 +34,12 @@ var t = function( p ) {
         second_involute = new SecondInvoluteOfCircle(c, first_start_angle, second_start_angle);
         p.background(200);
         p.stroke('black');
-        let testP = new Point(200, 100);
-        p.ellipse(testP.x, testP.y, 5, 5);
         p.noFill();
         c.draw(p);
         p.stroke('purple');
         involute.draw(p, first_start_angle, draw_angle, false);
         p.stroke('red');
         second_involute.draw(p, first_start_angle, draw_angle, false);
-        // debug
-        p.stroke('blue');
-        let tg = c.get_tangent_from_point(testP);
-        console.log(tg);
-        p.line(tg[0][0].x, tg[0][0].y, tg[0][1].x, tg[0][1].y);
-        p.line(tg[1][0].x, tg[1][0].y, tg[1][1].x, tg[1][1].y);
-
     }
 
     p.draw = function() {

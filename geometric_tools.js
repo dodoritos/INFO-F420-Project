@@ -9,9 +9,17 @@ class Point {
       return new Point(this.x + p.x, this.y + p.y);
     }
 
+    sub(p){
+      return new Point(this.x - p.x, this.y - p.y);
+    }
+
     toString(){
       return "(" + this.x + "," + this.y + ")";
     }
+}
+
+function toP5Vector(p){
+  return createVector(p.x, p.y);
 }
 /**
  * @param {Point} a
